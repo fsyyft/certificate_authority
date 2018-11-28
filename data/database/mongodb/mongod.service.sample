@@ -6,8 +6,10 @@ Documentation=https://docs.mongodb.org/manual
 [Service]
 User=mongod
 Group=mongod
+ExecStartPre=/usr/bin/chown mongod.mongod -R /data/database/mongodb
+ExecStartPre=/usr/bin/chown mongod.mongod -R /data/backup/mongodb
 ExecStart=/usr/bin/mongod -f /data/database/mongodb/${PORT}/conf/mongodb.${PORT}.conf
-ExecStop=/usr/bin/kill  $(/usr/bin/cat /data/database/mongodb/${PORT}/tmp/mongodb.${PORT}.pid)
+ExecStop=/data/database/mongodb/deploy stop ${PORT}
 
 [Install]
 WantedBy=multi-user.target

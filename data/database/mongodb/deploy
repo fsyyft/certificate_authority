@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. /data/shell/functions
+
 # 实例的端口号。
 PORT=$2
 
@@ -8,10 +10,11 @@ ROLE=$3
 
 # 实例的集群名称。
 REPLSETNAME=$4
+CONFIGDB=$4
 
 # 脚本所在目录。
 # 这里要注意下，如果写 /usr/bin/cd 会有问题。
-PATH_SHELL_FOLDER=$(cd `dirname $0`;/usr/bin/pwd)
+PATH_SHELL_FOLDER=$(cd `${SHELL_DIRNAME} $0`;${SHELL_PWD})
 
 # 实例文件夹根目录。
 PATH_DATA_ROOT=${PATH_SHELL_FOLDER}/${PORT}
@@ -43,65 +46,122 @@ then
     TEMPLATE_SERVICE=${PATH_SHELL_FOLDER}/mongos.service.sample
 fi
 
-install_service() {
+# 安装服务。
+function install_service() {
 if [ ! -d ${PATH_DATA_ROOT} ];
 then
-    myecho "创建实例文件夹："
-    /usr/bin/mkdir -p ${PATH_DATA_ROOT}/conf
-    /usr/bin/mkdir -p ${PATH_DATA_ROOT}/data
-    /usr/bin/mkdir -p ${PATH_DATA_ROOT}/logs
-    /usr/bin/mkdir -p ${PATH_DATA_ROOT}/tmp
+    echo_green "创建实例文件夹："
+    ${SHELL_MKDIR} -p ${PATH_DATA_ROOT}/conf
+    ${SHELL_MKDIR} -p ${PATH_DATA_ROOT}/data
+    ${SHELL_MKDIR} -p ${PATH_DATA_ROOT}/logs
+    ${SHELL_MKDIR} -p ${PATH_DATA_ROOT}/tmp
 
-    myecho "创建实例配置文件："
-    /usr/bin/cp ${TEMPLATE_CONF} ${PATH_CONF}
-    /usr/bin/sed -i "s/\${PORT}/${PORT}/g" ${PATH_CONF}
-    /usr/bin/sed -i "s/\${REPLSETNAME}/${REPLSETNAME}/g" ${PATH_CONF}
+    echo_green "创建实例配置文件："
+    ${SHELL_CP} ${TEMPLATE_CONF} ${PATH_CONF}
+    ${SHELL_SED} -i "s/\${PORT}/${PORT}/g" ${PATH_CONF}
 
-    myecho "创建服务配置文件："
-    /usr/bin/cp ${TEMPLATE_SERVICE} ${PATH_SERVICE}
-    /usr/bin/sed -i "s/\${PORT}/${PORT}/g" ${PATH_SERVICE}
+    echo_green "创建服务配置文件："
+    ${SHELL_CP} ${TEMPLATE_SERVICE} ${PATH_SERVICE}
+    ${SHELL_SED} -i "s/\${PORT}/${PORT}/g" ${PATH_SERVICE}
 
     if [[ "config" == ${ROLE} ]];
     then
-        /usr/bin/sed -i "s/\${CLUSTERROLE}/configsvr/g" ${PATH_CONF}
+        ${SHELL_SED} -i "s/\${REPLSETNAME}/${REPLSETNAME}/g" ${PATH_CONF}
+        ${SHELL_SED} -i "s/\${CLUSTERROLE}/configsvr/g" ${PATH_CONF}
     elif [[ "shard" == ${ROLE} ]];
     then
-        /usr/bin/sed -i "s/\${CLUSTERROLE}/shardsvr/g" ${PATH_CONF}
+        ${SHELL_SED} -i "s/\${REPLSETNAME}/${REPLSETNAME}/g" ${PATH_CONF}
+        ${SHELL_SED} -i "s/\${CLUSTERROLE}/shardsvr/g" ${PATH_CONF}
+    elif [[ "mongos" == ${ROLE} ]];
+    then
+        CONFIGDB_TMP=`${SHELL_ECHO} ${CONFIGDB} | ${SHELL_SED} 's#\/#\\\/#g'`
+        ${SHELL_SED} -i "s/\${CONFIGDB}/${CONFIGDB_TMP}/g" ${PATH_CONF}
     fi
 
-    /usr/bin/chown mongod.mongod -R ${PATH_DATA_ROOT}
+    ${SHELL_CHOWN} mongod.mongod -R ${PATH_DATA_ROOT}
 
-    myecho "开启服务并查看服务状态："
-    /usr/bin/systemctl daemon-reload
-    /sbin/service mongod.${PORT} start
-    /sbin/service mongod.${PORT} status
+    echo_green "开启服务并查看服务状态："
+    ${SHELL_SYSTEMCTL} daemon-reload
+    ${SHELL_SERVICE} mongod.${PORT} start
+    ${SHELL_SERVICE} mongod.${PORT} status
 
-    myecho "查看进程信息："
-    /usr/bin/ps -ef | /usr/bin/grep mongo | /usr/bin/grep -v "ps" | /usr/bin/grep -v "^root"
+    echo_green "查看进程信息："
+    ${SHELL_PS} -ef | ${SHELL_GREP} mongo | ${SHELL_GREP} -v "ps" | ${SHELL_GREP} -v "^root"
 else
-    /usr/bin/echo "实例根目录存在，如果需要重新配置，请先卸载服务，然后再进行。"
+    ${SHELL_ECHO} "实例根目录存在，如果需要重新配置，请先卸载服务，然后再进行。"
 fi
 }
 
-uninstall_service() {
-    myecho "查看服务状态并关闭服务："
-    /usr/bin/systemctl daemon-reload
-    /sbin/service mongod.${PORT} status
-    /sbin/service mongod.${PORT} stop
+# 备份。
+function backup() {
+    # 备份实例数据。
+    PWD_CURRENT=`${SHELL_PWD}`
+    PATH_BACKUP_ROOT=/data/backup/mongodb
+    BACKUP_NAME=mongodb.${PORT}.`${SHELL_DATE} +%y%m%d%H%M`
+    BACKUP_TMP_DIR=${PATH_BACKUP_ROOT}/${BACKUP_NAME}
+    BACKUP_ZIPFILE=${PATH_BACKUP_ROOT}/${BACKUP_NAME}.zip
 
-    myecho "禁用服务并删除服务配置："
-    /usr/bin/systemctl disable mongod.${PORT}
-    /usr/bin/rm -rf ${PATH_SERVICE}
+    if [[ -d ${BACKUP_TMP_DIR} ]];
+    then
+        ${SHELL_RM} -rf ${BACKUP_TMP_DIR}
+    fi
 
-    myecho "删除实例文件夹："
-    /usr/bin/rm -rf ${PATH_DATA_ROOT}
+    echo_blue "正在备份数据。"
+    ${SHELL_CP} -r ${PATH_DATA_ROOT} ${BACKUP_TMP_DIR}
+    cd ${BACKUP_TMP_DIR}
+    ${SHELL_ZIP} -r -v -9 -T ${BACKUP_ZIPFILE} data conf > ${PATH_DATA_ROOT}/logs/backup.${BACKUP_NAME}.log
+    cd ${PWD_CURRENT}
+    ${SHELL_RM} -rf ${BACKUP_TMP_DIR}
+    
+    echo_yellow "备份数据到 ${BACKUP_ZIPFILE}。"
 }
 
-myecho() {
-    /usr/bin/echo -e "\033[32m$1\033[0m"
+# 卸载服务。
+function uninstall_service() {
+    echo_green "查看服务状态并关闭服务："
+    ${SHELL_SYSTEMCTL} daemon-reload
+    ${SHELL_SERVICE} mongod.${PORT} status
+    ${SHELL_SERVICE} mongod.${PORT} stop
+
+    echo_green "禁用服务并删除服务配置："
+    ${SHELL_SYSTEMCTL} disable mongod.${PORT}
+    ${SHELL_RM} -rf ${PATH_SERVICE}
+
+    echo_green "删除实例文件夹："
+    ${SHELL_RM} -rf ${PATH_DATA_ROOT}
+}
+
+# 停止服务。
+function stop_service() {
+    PID_FILE=${PATH_DATA_ROOT}/tmp/mongodb.${PORT}.pid
+    PID=`${SHELL_CAT} ${PID_FILE}`
+    ${SHELL_KILL} ${PID}
+
+    # 备份实例数据。
+    backup
+}
+
+function help() {
+    echo_green "安装单实例："
+    ${SHELL_ECHO} "    ${PATH_SHELL_FOLDER}/deploy install {端口号} single"
+    ${SHELL_ECHO} "    ${PATH_SHELL_FOLDER}/deploy install 2741 single"
+    echo_yellow "安装配置集群（不包含配置）："
+    ${SHELL_ECHO} "    ${PATH_SHELL_FOLDER}/deploy install {端口号} config {集群名称}"
+    ${SHELL_ECHO} "    ${PATH_SHELL_FOLDER}/deploy install 2701 config configs"
+    echo_yellow "安装数据集群（不包含配置）："
+    ${SHELL_ECHO} "    ${PATH_SHELL_FOLDER}/deploy install {端口号} shard {集群名称}"
+    ${SHELL_ECHO} "    ${PATH_SHELL_FOLDER}/deploy install 2711 shard shard1"
+    echo_yellow "安装路由（不包含配置）："
+    ${SHELL_ECHO} "    ${PATH_SHELL_FOLDER}/deploy install {端口号} mongos {配置集群信息}"
+    ${SHELL_ECHO} "    ${PATH_SHELL_FOLDER}/deploy install 2700 mongos configs/127.0.0.1:2701,127.0.0.1:2702,127.0.0.1:2703"
+    echo_red "卸载实例（包含删除数据）："
+    ${SHELL_ECHO} "    ${PATH_SHELL_FOLDER}/deploy uninstall {端口号}"
+    ${SHELL_ECHO} "    ${PATH_SHELL_FOLDER}/deploy uninstall 2742"
 }
 
 case $1 in
     "install") install_service ;;
     "uninstall") uninstall_service ;;
+    "stop") stop_service ;;
+    *) help ;;
 esac

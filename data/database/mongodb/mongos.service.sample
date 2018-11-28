@@ -1,0 +1,13 @@
+[Unit]
+Description=MongoDB Route Server
+After=network.target
+Documentation=https://docs.mongodb.org/manual
+
+[Service]
+User=mongod
+Group=mongod
+ExecStart=/usr/bin/mongos -f /data/database/mongodb/${PORT}/conf/mongodb.${PORT}.conf
+ExecStop=/usr/bin/kill  $(/usr/bin/cat /data/database/mongodb/${PORT}/tmp/mongodb.${PORT}.pid)
+
+[Install]
+WantedBy=multi-user.target

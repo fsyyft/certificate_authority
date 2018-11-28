@@ -1,0 +1,12 @@
+logpath             = /data/database/mongodb/${PORT}/logs/mongodb.${PORT}.log
+
+pidfilepath         = /data/database/mongodb/${PORT}/tmp/mongodb.${PORT}.pid
+
+port                = ${PORT}
+bind_ip             = 0.0.0.0
+maxConns            = 512
+unixSocketPrefix    = /data/database/mongodb/${PORT}/tmp/
+sslMode             = disabled
+    
+keyFile             = /data/database/mongodb/keyfile.dat
+configdb            = ${CONFIGDB}

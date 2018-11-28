@@ -1,14 +1,62 @@
 #!/bin/bash
+SHELL_CHMOD=/usr/bin/chmod
+SHELL_CHOWN=/usr/bin/chown
+SHELL_CAT=/usr/bin/cat
+SHELL_CP=/usr/bin/cp
 SHELL_DATE=/usr/bin/date
+SHELL_DIRNAME=/usr/bin/dirname
 SHELL_DOCKER=/usr/bin/docker
 SHELL_ECHO=/usr/bin/echo
 SHELL_GREP=/usr/bin/grep
+SHELL_KILL=/usr/bin/kill
+SHELL_MKDIR=/usr/bin/mkdir
+SHELL_OPENSSL=/usr/bin/openssl
+SHELL_PS=/usr/bin/ps
+SHELL_PWD=/usr/bin/pwd
+SHELL_RM=/usr/bin/rm
+SHELL_SED=/usr/bin/sed
+SHELL_SERVICE=/sbin/service
+SHELL_SYSTEMCTL=/usr/bin/systemctl
+SHELL_TREE=/usr/bin/tree
+SHELL_YUM=/usr/bin/yum
+SHELL_ZIP=/usr/bin/zip
 
-function echo_tips() {
-    ${SHELL_ECHO} -e "\033[35m $1 \033[0m"
+
+# ============================================================
+# 向控制台输出不同颜色的字符。
+# ============================================================
+
+# 向控制台输出绿色字体。
+# 参数1：待输出的文本。
+function echo_green() {
+    ${SHELL_ECHO} -e "\033[32m$1\033[0m"
 }
 
-function echo_docker_container_info(){
+# 向控制台输出红色字段。
+# 参数1：待输出的文本。
+function echo_red() {
+    ${SHELL_ECHO} -e "\033[31m$1\033[0m"
+}
+
+# 向控制台输出蓝色字段。
+# 参数1：待输出的文本。
+function echo_blue() {
+    ${SHELL_ECHO} -e "\033[34m$1\033[0m"
+}
+
+# 向控制台输出黄色字段。
+# 参数1：待输出的文本。
+function echo_yellow() {
+    ${SHELL_ECHO} -e "\033[33m$1\033[0m"
+}
+
+
+# ============================================================
+# 以下是 Docker 相关的函数。
+# ============================================================
+
+
+function echo_docker_container_info() {
     CONTAINER_NAME=$1
     echo_tips "\n运行状态："
     ${SHELL_DOCKER} ps -a | ${SHELL_GREP} --color=auto ${CONTAINER_NAME}
@@ -24,7 +72,7 @@ function echo_docker_container_info(){
     ${SHELL_DOCKER} exec -it ${CONTAINER_NAME} /usr/bin/ps aux
 }
 
-function docker_build(){
+function docker_build() {
     DOCKERFILE_DIR_BASE=$1
     IMAGE_NAME=$2
     IMAGE_NAMESPACE=ppno.net
@@ -40,10 +88,4 @@ function docker_build(){
     fi
 
     ${SHELL_DOCKER} build --network=host -t ${IMAGE_FULL_NAME_TAG} ${DOCKERFILE_DIR}
-
-    IMAGE_EXISTS=`${SHELL_DOCKER} images ${IMAGE_FULL_NAME_TAG} | ${SHELL_GREP} -v REPOSITORY`
-    if [ -n "${IMAGE_EXISTS}" ]; then
-        ${SHELL_DOCKER} tag ${IMAGE_FULL_NAME_TAG} ${IMAGE_FULL_NAME_LATEST}
-    fi
-    ${SHELL_DOCKER} images ${IMAGE_FULL_NAME}
 }

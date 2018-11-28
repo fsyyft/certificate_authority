@@ -1,0 +1,98 @@
+#!/bin/bash
+
+. ./functions
+
+ROOT_PATH_SHELL=/data/shell
+ROOT_PATH_MONGODB=/data/database/mongodb
+
+# 脚本所在目录。
+# 这里要注意下，如果写 /usr/bin/cd 会有问题。
+PATH_SHELL_FOLDER=$(cd `${SHELL_DIRNAME} $0`;${SHELL_PWD})
+
+# 复制常用函数文件。
+function copy_function() {
+    # 如果目录不存在，则创建目录。
+    if [ ! -d ${ROOT_PATH_SHELL} ];
+    then
+        ${SHELL_MKDIR} -p ${ROOT_PATH_SHELL}
+    fi
+
+    # 如果文件已经存在，则删除文件。
+    PATH_FUNCTION=${ROOT_PATH_SHELL}/functions
+    if [ -f ${PATH_FUNCTION} ];
+    then
+        ${SHELL_RM} -rf ${PATH_FUNCTION}
+    fi
+
+    # 拷贝文件，移除写和执行权限。
+    ${SHELL_CP} ${PATH_SHELL_FOLDER}/functions ${ROOT_PATH_SHELL}
+    ${SHELL_CHMOD} a-w ${PATH_FUNCTION}
+    ${SHELL_CHMOD} a-x ${PATH_FUNCTION}
+    ${SHELL_TREE} -ugD -L 1 ${ROOT_PATH_SHELL}
+    
+    echo_green "常用函数文件复制完成。"
+}
+
+copy_function
+
+# 使用 yum 安装 MongoDB。
+function yum_install_mongodb() {
+    REPO_NAME=fsyyft-mongodb-org-4.0
+    REPO_FILE=${PATH_SHELL_FOLDER}/../../etc/yum.repos.d/${REPO_NAME}.repo
+
+    # 复制 repo 文件。
+    ${SHELL_CP} ${REPO_FILE} /etc/yum.repos.d/
+    
+    # 使用 yum 安装软件。
+    ${SHELL_YUM} -y install mongodb-org --enablerepo=${REPO_NAME}
+    ${SHELL_YUM} -y update mongodb-org --enablerepo=${REPO_NAME}
+
+    echo_green "软件安装、更新完成。"
+
+    # 复制服务所需要的文件。
+    if [ ! -d ${ROOT_PATH_MONGODB} ];
+    then
+        ${SHELL_MKDIR} -p ${ROOT_PATH_MONGODB}
+    fi
+
+    ${SHELL_CP} ${PATH_SHELL_FOLDER}/../database/mongodb/deploy ${ROOT_PATH_MONGODB} 
+    ${SHELL_CP} ${PATH_SHELL_FOLDER}/../database/mongodb/mongod.conf.sample ${ROOT_PATH_MONGODB} 
+    ${SHELL_CP} ${PATH_SHELL_FOLDER}/../database/mongodb/mongod.conf.single ${ROOT_PATH_MONGODB} 
+    ${SHELL_CP} ${PATH_SHELL_FOLDER}/../database/mongodb/mongod.service.sample ${ROOT_PATH_MONGODB} 
+    ${SHELL_CP} ${PATH_SHELL_FOLDER}/../database/mongodb/mongos.conf.sample ${ROOT_PATH_MONGODB} 
+    ${SHELL_CP} ${PATH_SHELL_FOLDER}/../database/mongodb/mongos.service.sample ${ROOT_PATH_MONGODB} 
+
+    if [ ! -f ${ROOT_PATH_MONGODB}/keyfile.dat ];
+    then
+        ${SHELL_OPENSSL} rand -base64 512 > ${ROOT_PATH_MONGODB}/keyfile.dat
+    fi
+
+    # 修改目录权限。
+    ${SHELL_CHOWN} mongod.mongod -R ${ROOT_PATH_MONGODB}
+    ${SHELL_CHMOD} a+x ${ROOT_PATH_MONGODB}/deploy 
+    ${SHELL_CHMOD} 600 ${ROOT_PATH_MONGODB}/keyfile.dat
+    ${SHELL_CHMOD} 400 ${ROOT_PATH_MONGODB}/mongod.conf.sample
+    ${SHELL_CHMOD} 400 ${ROOT_PATH_MONGODB}/mongod.conf.single
+    ${SHELL_CHMOD} 400 ${ROOT_PATH_MONGODB}/mongod.service.sample
+    ${SHELL_CHMOD} 400 ${ROOT_PATH_MONGODB}/mongos.conf.sample
+    ${SHELL_CHMOD} 400 ${ROOT_PATH_MONGODB}/mongos.service.sample
+
+    # 移除默认服务。
+    ${SHELL_SYSTEMCTL} disable mongod
+    
+    PATH_BACKUP_ROOT=/data/backup/mongodb
+
+    # 如果备份文件夹不存在，先创建。
+    if [[ ! -d ${PATH_BACKUP_ROOT} ]]
+    then
+        ${SHELL_MKDIR} -p ${PATH_BACKUP_ROOT}
+    fi
+    ${SHELL_CHOWN} mongod.mongod -R ${PATH_BACKUP_ROOT}
+
+    ${SHELL_TREE} -ugD -L 1 ${ROOT_PATH_MONGODB}
+    echo_green "操作完成。"
+}
+
+case $1 in
+    "yum_install_mongodb") yum_install_mongodb ;;
+esac
