@@ -1,0 +1,154 @@
+#!/bin/bash
+
+# 脚本所在目录。
+# 这里要注意下，如果写 /usr/bin/cd 会有问题。
+PATH_SHELL_FOLDER=$(cd `dirname $0`;pwd)
+
+PATH_ROOT=${PATH_SHELL_FOLDER}/..
+cd ${PATH_ROOT}
+
+. ${PATH_ROOT}/../../shell/functions
+. ${PATH_ROOT}/../ca_root/bin/functions
+echo_blue "进入工作目录：$(${SHELL_PWD})"
+
+PATH_CONFIG=${PATH_ROOT}/conf/vpn.conf
+
+########## ########## ########## ########## ##########
+# 生成 OpenVPN 服务端证书请求文件。
+function req_vpn_openvpn_server () {
+    SERVER_NAME=$1
+    SERVER_ID=$2
+    SERVER_IP=$3
+
+    SERVER_DOMAIN_BASE=server.openvpn.${CONF_DOMAIN}
+    SERVER_DOMAIN=${SERVER_NAME}.${SERVER_DOMAIN_BASE}
+
+    # 服务端如果没有定义专用密钥对，可以只用一个密钥对。
+    FILE_KEY=${SERVER_DOMAIN_BASE}.key
+
+    if [ -f private/${SERVER_DOMAIN}.key.zip ]; then
+        FILE_KEY=${SERVER_DOMAIN}.key
+    fi    
+
+    FILE_CSR=${SERVER_DOMAIN}.csr
+    CONF_EXTENSIONS=v3_vpn_openvpn_server
+    CONF_SERIAL=E3E3E30401010100${SERVER_ID}
+
+    export SUBJ_OPENVPN_SERVER_NAME=${SERVER_NAME}
+    export SUBJ_OPENVPN_IP=${SERVER_IP}
+
+    req_common  ${FILE_KEY}                                     \
+                ${FILE_CSR}                                     \
+                ${CONF_SERIAL}                                  \
+                ${CONF_EXTENSIONS}                              \
+                "GlobalDevSign OpenVPN Server Authority"        \
+                ${SERVER_DOMAIN}                                \
+                ${SERVER_DOMAIN}  
+ 
+    unset SUBJ_OPENVPN_SERVER_NAME
+    unset SUBJ_OPENVPN_IP
+}
+
+########## ########## ########## ########## ##########
+# 签名 OpenVPN 服务端证书。
+function sign_vpn_openvpn_server () {
+    SERVER_NAME=$1
+    SERVER_ID=$2
+    SERVER_IP=$3
+
+    SERVER_DOMAIN_BASE=server.openvpn.${CONF_DOMAIN}
+    SERVER_DOMAIN=${SERVER_NAME}.${SERVER_DOMAIN_BASE}
+
+    FILE_KEY_CA=ca.openvpn.vpn.${CONF_DOMAIN}.key
+    FILE_CRT_CA=ca.openvpn.vpn.${CONF_DOMAIN}.crt
+    FILE_CSR=${SERVER_DOMAIN}.csr
+    FILE_CRT=${SERVER_DOMAIN}.crt
+    CONF_EXTENSIONS=v3_vpn_openvpn_server
+    CONF_SERIAL=E3E3E30401010100${SERVER_ID}
+
+    export SUBJ_OPENVPN_SERVER_NAME=${SERVER_NAME}
+    export SUBJ_OPENVPN_IP=${SERVER_IP}
+
+    sign_common  ${FILE_KEY_CA}                                 \
+                    ${FILE_CRT_CA}                              \
+                    ${FILE_CSR}                                 \
+                    ${FILE_CRT}                                 \
+                    ${CONF_SERIAL}                              \
+                    ${CONF_EXTENSIONS}
+
+    export SUBJ_OPENVPN_SERVER_NAME=${SERVER_NAME}
+    export SUBJ_OPENVPN_IP=${SERVER_IP}
+
+    
+    unset SUBJ_OPENVPN_SERVER_NAME
+    unset SUBJ_OPENVPN_IP
+}
+
+########## ########## ########## ########## ##########
+# 生成 OpenVPN 客户端证书请求文件。
+function req_vpn_openvpn_client () {
+    CLIENT_NAME=$1
+    CLIENT_ID=$2
+    CLIENT_IP=$3
+
+    CLIENT_DOMAIN_BASE=openvpn.${CONF_DOMAIN}
+    CLIENT_DOMAIN=${CLIENT_NAME}.${CLIENT_DOMAIN_BASE}
+
+    FILE_KEY=${CLIENT_DOMAIN}.key
+    FILE_CSR=${CLIENT_DOMAIN}.csr
+    CONF_EXTENSIONS=v3_vpn_openvpn_client
+    CONF_SERIAL=E3E3E30401010101${CLIENT_ID}
+
+    export SUBJ_OPENVPN_CLIENT_NAME=${CLIENT_NAME}
+    export SUBJ_OPENVPN_IP=${CLIENT_IP}
+
+    req_common  ${FILE_KEY}                                     \
+                ${FILE_CSR}                                     \
+                ${CONF_SERIAL}                                  \
+                ${CONF_EXTENSIONS}                              \
+                "GlobalDevSign OpenVPN Client Authority"        \
+                ${CLIENT_DOMAIN}                                \
+                ${CLIENT_DOMAIN}  
+   
+    unset SUBJ_OPENVPN_CLIENT_NAME
+    unset SUBJ_OPRNVPN_IP
+}
+
+########## ########## ########## ########## ##########
+# 签名 OpenVPN 客户端证书。
+function sign_vpn_openvpn_client () {
+    CLIENT_NAME=$1
+    CLIENT_ID=$2
+    CLIENT_IP=$3
+
+    CLIENT_DOMAIN_BASE=openvpn.${CONF_DOMAIN}
+    CLIENT_DOMAIN=${CLIENT_NAME}.${CLIENT_DOMAIN_BASE}
+
+    FILE_KEY_CA=ca.openvpn.vpn.${CONF_DOMAIN}.key
+    FILE_CRT_CA=ca.openvpn.vpn.${CONF_DOMAIN}.crt
+    FILE_CSR=${CLIENT_DOMAIN}.csr
+    FILE_CRT=${CLIENT_DOMAIN}.crt
+    CONF_EXTENSIONS=v3_vpn_openvpn_client
+    CONF_SERIAL=E3E3E30401010101${CLIENT_ID}
+
+    export SUBJ_OPENVPN_CLIENT_NAME=${CLIENT_NAME}
+    export SUBJ_OPENVPN_IP=${CLIENT_IP}
+
+    sign_common  ${FILE_KEY_CA}                                 \
+                    ${FILE_CRT_CA}                              \
+                    ${FILE_CSR}                                 \
+                    ${FILE_CRT}                                 \
+                    ${CONF_SERIAL}                              \
+                    ${CONF_EXTENSIONS}    
+    
+    unset SUBJ_OPENVPN_CLIENT_NAME
+    unset SUBJ_OPRNVPN_IP
+}
+
+case $1 in
+    "req_vpn_openvpn_server") req_vpn_openvpn_server $2 $3 $4;;
+    "sign_vpn_openvpn_server") sign_vpn_openvpn_server $2 $3 $4;;
+    "req_vpn_openvpn_client") req_vpn_openvpn_client $2 $3 $4;;
+    "sign_vpn_openvpn_client") sign_vpn_openvpn_client $2 $3 $4;;
+    "genkey") genkey  $2 $3 $4 $4;;
+esac

@@ -9,10 +9,13 @@ SHELL_DOCKER=/usr/bin/docker
 SHELL_ECHO=/usr/bin/echo
 SHELL_GREP=/usr/bin/grep
 SHELL_KILL=/usr/bin/kill
+SHELL_LS=/usr/bin/ls
 SHELL_MKDIR=/usr/bin/mkdir
+SHELL_MV=/usr/bin/mv
 SHELL_OPENSSL=/usr/bin/openssl
 SHELL_PS=/usr/bin/ps
 SHELL_PWD=/usr/bin/pwd
+SHELL_READ=/usr/bin/read
 SHELL_RM=/usr/bin/rm
 SHELL_SED=/usr/bin/sed
 SHELL_SERVICE=/sbin/service
@@ -20,6 +23,7 @@ SHELL_SYSTEMCTL=/usr/bin/systemctl
 SHELL_TREE=/usr/bin/tree
 SHELL_YUM=/usr/bin/yum
 SHELL_ZIP=/usr/bin/zip
+SHELL_UNZIP=/usr/bin/unzip
 
 
 # ============================================================
@@ -50,6 +54,19 @@ function echo_yellow() {
     ${SHELL_ECHO} -e "\033[33m$1\033[0m"
 }
 
+# 判断文件是否存在，如果存在则删除。
+# 参数1：待删除的文件。
+function rm_file() {
+    if [ -e $1 ]; then
+        ${SHELL_RM} -rf $1
+        
+        if [ -e $1 ]; then
+            echo_green "文件 $1 删除失败。"
+        else
+            echo_yellow "文件 $1 删除成功。"
+        fi
+    fi
+}
 
 # ============================================================
 # 以下是 Docker 相关的函数。
