@@ -13,10 +13,14 @@
 #### 操作步骤
 
 1. 生成密钥（如果已经有，则将密钥放到 private 目录下）。
-2. 创建证书颁发请求。
-3. 使用 OpenVPN CA 签名。
+2. 复制密钥和证书到 OpenVPN 相关目录。
+3. 创建证书颁发请求；使用 OpenVPN CA 签名。
 
 ```bash
 [fsyyft@kvm-centos7-openssl pki]# cd /data/pki/
 [fsyyft@kvm-centos7-openssl pki]# ca_vpn/bin/openvpn genkey 1024 123456 123456
+[fsyyft@kvm-centos7-openssl pki]# cp ca_root/private/ca.openvpn.vpn.ppno.net.key.zip ca_vpn/private
+[fsyyft@kvm-centos7-openssl pki]# cp ca_root/certs/ca.openvpn.vpn.ppno.net.crt ca_vpn/certs
+[fsyyft@kvm-centos7-openssl pki]# export CRT_ENDDATE=20331029151029Z
+[fsyyft@kvm-centos7-openssl pki]# ca_vpn/bin/openvpn server qd
 ```

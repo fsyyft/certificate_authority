@@ -60,7 +60,7 @@ function req_vpn_openvpn_server () {
     fi    
 
     FILE_CSR=${SERVER_DOMAIN}.csr
-    CONF_EXTENSIONS=v3_vpn_openvpn_server
+    CONF_EXTENSIONS=v3_vpn_openvpn_server_req
     CONF_SERIAL=E3E3E30401010100${SERVER_ID}
 
     export SUBJ_OPENVPN_SERVER_NAME=${SERVER_NAME}

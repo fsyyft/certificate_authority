@@ -6,9 +6,10 @@ PATH_SHELL_FOLDER=$(cd `dirname $0`;pwd)
 
 PATH_ROOT=${PATH_SHELL_FOLDER}/..
 PATH_CMD=${PATH_ROOT}/bin/vpn
+export PATH_CA_ROOT=${PATH_ROOT}
 cd ${PATH_ROOT}
 
-. ${PATH_ROOT}/../../shell/functions
+. ${PATH_ROOT}/../ca_root/bin/functions
 echo_blue 进入工作目录：$(${SHELL_PWD})
 
 ########## ########## ########## ########## ##########
@@ -27,6 +28,11 @@ function server() {
         "pi")
             SERVER_ID=0A
             SERVER_IP="172.27.16.1"
+            ;;
+        # Work Docker。
+        "wd")
+            SERVER_ID=D5
+            SERVER_IP="172.27.213.1"
             ;;
     esac
 
