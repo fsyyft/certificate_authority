@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd";>
+<plist version="1.0">
+<dict>
+  <!--
+    链接：/usr/local/etc/openvpn -> /data/etc/openvpn。
+    链接：/usr/local/var/log/openvpn -> /data/var/log/openvpn。
+    链接：/Library/LaunchDaemons/net.ppno.openvpn.qd.plist -> /usr/local/etc/openvpn/qd.asux.home/net.ppno.openvpn.qd.plist。
+  -->
+
+  <key>Label</key>
+  <string>net.ppno.openvpn.qd</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/sbin/openvpn</string>
+    <string>--config</string>
+    <string>/usr/local/etc/openvpn/qd.asux.home/qd.asux.home.conf</string>
+  </array>
+
+  <key>StandardOutPath</key>
+  <string>/usr/local/var/log/openvpn/qd.asux.home/qd.asux.home.stdout.txt</string>
+
+  <key>StandardErrorPath</key>
+  <string>/usr/local/var/log/openvpn/qd.asux.home/qd.asux.home.stderr.txt</string>
+
+  <key>OnDemand</key>
+  <true/>
+
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>TimeOut</key>
+  <integer>90</integer>
+
+  <key>WorkingDirectory</key>
+  <string>/usr/local/var/log/openvpn</string>
+</dict>
+</plist>
