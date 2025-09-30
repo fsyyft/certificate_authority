@@ -123,10 +123,11 @@ function sign_ca_internet () {
 ########## ########## ########## ########## ##########
 # 生成 Internet Service  颁发机构证书请求文件。
 function req_ca_internet_service () {
+    CONF_EXTENSIONS=v3_ca_internet_service_req
     req_common  ${CONF_KEY_CA_INTERNET_SERVICE}                 \
                 ${CONF_CSR_CA_INTERNET_SERVICE}                 \
                 ${CONF_SER_CA_INTERNET_SERVICE}                 \
-                "v3_ca_internet_service"                        \
+                ${CONF_EXTENSIONS}                              \
                 "GlobalDevSign Internet Service Authority"      \
                 "ca.service.internet.${CONF_DOMAIN}"            \
                 "GlobalDevSign Internet Service Authority"
@@ -140,7 +141,9 @@ function sign_ca_internet_service () {
                     ${CONF_CSR_CA_INTERNET_SERVICE}             \
                     ${CONF_CRT_CA_INTERNET_SERVICE}             \
                     ${CONF_SER_CA_INTERNET_SERVICE}             \
-                    "v3_ca_internet_service"
+                    "v3_ca_internet_service"                    \
+                    ${CONF_STARTDATE}                           \
+                    ${CONF_ENDDATE}
 }
 
 ########## ########## ########## ########## ##########
