@@ -1,6 +1,0 @@
-[fsyyft-mongodb-org-4.0]
-name=Aliyun MongoDB Repository
-baseurl=http://mirrors.aliyun.com/mongodb/yum/redhat/7Server/mongodb-org/4.0/x86_64/
-gpgcheck=1
-enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-4.0.asc
