@@ -7,9 +7,18 @@ PATH_SHELL_FOLDER=$(cd `dirname $0`;pwd)
 PATH_ROOT=${PATH_SHELL_FOLDER}/..
 cd ${PATH_ROOT}
 
-. ${PATH_ROOT}/../../shell/functions
 . ${PATH_ROOT}/bin/functions
 echo_blue "进入工作目录：$(${SHELL_PWD})"
+
+if [ ! -d private ]; then
+    ${SHELL_MKDIR} -p private
+    if [ -d private ]; then
+        echo_yellow "检测到缺少 private 目录，已自动创建。"
+    else
+        echo_red "创建 private 目录失败，请检查权限。"
+        exit 1
+    fi
+fi
 
 PATH_CONFIG=${PATH_ROOT}/conf/ca.${CONF_DOMAIN}.conf
 
