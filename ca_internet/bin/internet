@@ -40,7 +40,7 @@ function check_and_copy_ca_files() {
     
     local missing_files=()
     
-    CA_ROOT=${PATH_ROOT}../ca_root
+    CA_ROOT=${PATH_ROOT}/../ca_root
 
     for file in "${ca_files[@]}"; do
         if [ ! -f "$file" ]; then

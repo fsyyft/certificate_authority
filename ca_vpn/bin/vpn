@@ -28,6 +28,52 @@ function check_and_create_dirs() {
 
 check_and_create_dirs
 
+# 检查并复制必要的 CA 证书文件
+function check_and_copy_ca_files() {
+    local ca_files=(
+        "private/ca.openvpn.vpn.ppno.net.key.zip"
+        "certs/ca.openvpn.vpn.ppno.net.crt"
+    )
+    
+    local missing_files=()
+    
+    CA_ROOT=${PATH_ROOT}/../ca_root
+
+    for file in "${ca_files[@]}"; do
+        if [ ! -f "$file" ]; then
+            # 检查 ca_root 目录下是否存在
+            if [ -f "${CA_ROOT}/$file" ]; then
+                # 确保目标目录存在
+                local target_dir=$(dirname "$file")
+                if [ ! -d "$target_dir" ]; then
+                    ${SHELL_MKDIR} -p "$target_dir"
+                fi
+                # 复制文件
+                ${SHELL_CP} "${CA_ROOT}/$file" "$file"
+                if [ -f "$file" ]; then
+                    echo_yellow "已从 ca_root 复制 $file"
+                else
+                    echo_red "复制 $file 失败"
+                    exit 1
+                fi
+            else
+                missing_files+=("$file")
+            fi
+        fi
+    done
+    
+    # 如果有缺失的文件，提示错误
+    if [ ${#missing_files[@]} -gt 0 ]; then
+        echo_red "以下 CA 证书文件缺失，请先在 ca_root 中生成证书颁发机构所需要的私钥和机构证书："
+        for file in "${missing_files[@]}"; do
+            echo_red "  - $file"
+        done
+        exit 1
+    fi
+}
+
+check_and_copy_ca_files
+
 ########## ########## ########## ########## ##########
 # 打印脚本用法说明。
 function show_usage() {
