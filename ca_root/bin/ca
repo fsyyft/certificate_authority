@@ -170,10 +170,11 @@ function sign_ca_internet_personal () {
 ########## ########## ########## ########## ##########
 # 生成 VPN 颁发机构证书请求文件。
 function req_ca_vpn () {
+    CONF_EXTENSIONS=v3_ca_vpn_req
     req_common  ${CONF_KEY_CA_VPN}                              \
                 ${CONF_CSR_CA_VPN}                              \
                 ${CONF_SER_CA_VPN}                              \
-                "v3_ca_vpn"                                     \
+                ${CONF_EXTENSIONS}                              \
                 "GlobalDevSign VPN Authority"                   \
                 "ca.vpn.${CONF_DOMAIN}"                         \
                 "GlobalDevSign VPN Authority"
