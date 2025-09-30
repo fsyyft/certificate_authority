@@ -44,6 +44,36 @@ fi
 PATH_CONFIG=${PATH_ROOT}/conf/ca.${CONF_DOMAIN}.conf
 
 ########## ########## ########## ########## ##########
+# 打印脚本用法说明。
+function show_usage() {
+    local invalid_command=$1
+
+    if [ -n "${invalid_command}" ]; then
+        echo_red "未知命令：${invalid_command}"
+        echo
+    fi
+
+    ${SHELL_ECHO} "用法：${0##*/} <命令> [参数]"
+    ${SHELL_ECHO} ""
+    ${SHELL_ECHO} "可用命令："
+    printf "  %-36s %s\n" "req_ca" "生成根证书请求文件"
+    printf "  %-36s %s\n" "selfsign_ca" "自签名根证书"
+    printf "  %-36s %s\n" "req_ca_vpn" "生成 VPN 颁发机构证书请求文件"
+    printf "  %-36s %s\n" "sign_ca_vpn" "签名 VPN 颁发机构证书"
+    printf "  %-36s %s\n" "req_ca_internet" "生成 Internet 颁发机构证书请求文件"
+    printf "  %-36s %s\n" "sign_ca_internet" "签名 Internet 颁发机构证书"
+    printf "  %-36s %s\n" "req_ca_internet_service" "生成 Internet Service 颁发机构证书请求文件"
+    printf "  %-36s %s\n" "sign_ca_internet_service" "签名 Internet Service 颁发机构证书"
+    printf "  %-36s %s\n" "req_ca_internet_personal" "生成 Internet Personal 颁发机构证书请求文件"
+    printf "  %-36s %s\n" "sign_ca_internet_personal" "签名 Internet Personal 颁发机构证书"
+    printf "  %-36s %s\n" "req_ca_vpn_openvpn" "生成 OpenVPN 颁发机构证书请求文件"
+    printf "  %-36s %s\n" "sign_ca_vpn_openvpn" "签名 OpenVPN 颁发机构证书"
+    printf "  %-36s %s\n" "req_ca_test" "生成测试颁发机构证书请求文件"
+    printf "  %-36s %s\n" "sign_ca_test" "签名测试颁发机构证书"
+    printf "  %-36s %s\n" "genkey <name> <length> <password>" "生成密钥并压缩到 private 目录（参数依次为名称、长度、密码）"
+}
+
+########## ########## ########## ########## ##########
 # 生成根证书请求文件。
 function req_ca () {
     CONF_EXTENSIONS=v3_ca_root_req
@@ -149,10 +179,11 @@ function sign_ca_internet_service () {
 ########## ########## ########## ########## ##########
 # 生成 Internet Personal  颁发机构证书请求文件。
 function req_ca_internet_personal () {
+    CONF_EXTENSIONS=v3_ca_vpn_openvpn_req
     req_common  ${CONF_KEY_CA_INTERNET_PERSONAL}                \
                 ${CONF_CSR_CA_INTERNET_PERSONAL}                \
                 ${CONF_SER_CA_INTERNET_PERSONAL}                \
-                "v3_ca_internet_personal"                       \
+                ${CONF_EXTENSIONS}                              \
                 "GlobalDevSign Internet Personal Authority"     \
                 "ca.personal.internet.${CONF_DOMAIN}"           \
                 "GlobalDevSign Internet Personal Authority"
@@ -166,7 +197,9 @@ function sign_ca_internet_personal () {
                     ${CONF_CSR_CA_INTERNET_PERSONAL}            \
                     ${CONF_CRT_CA_INTERNET_PERSONAL}            \
                     ${CONF_SER_CA_INTERNET_PERSONAL}            \
-                    "v3_ca_internet_personal"
+                    "v3_ca_internet_personal"                   \
+                    ${CONF_STARTDATE}                           \
+                    ${CONF_ENDDATE}
 }
 
 
@@ -263,4 +296,6 @@ case $1 in
     "req_ca_test") req_ca_test;;
     "sign_ca_test") sign_ca_test;;
     "genkey") genkey  $2 $3 $4 $4;;
+    "help"|"-h"|"--help"|"") show_usage "" ;;
+    *) show_usage "$1"; exit 0 ;;
 esac
