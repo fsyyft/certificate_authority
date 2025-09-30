@@ -95,14 +95,17 @@ if [ -n "${CRT_ENDDATE:-}" ]; then
 
     CONF_ENDDATE=${CRT_ENDDATE}
 fi
-# 测试证书的有效期开始、结束时间（兼容 Linux 与 macOS）。
-if [ "$(uname)" = "Darwin" ]; then
-    CONF_STARTDATE_TEST=$(${SHELL_DATE} -v-1d +%y%m%d151029Z)
-    CONF_ENDDATE_TEST=$(${SHELL_DATE} -v+1m +%y%m%d151029Z)
-else
-    CONF_STARTDATE_TEST=$(${SHELL_DATE} -d "yesterday" +%y%m%d151029Z)
-    CONF_ENDDATE_TEST=$(${SHELL_DATE} -d "next month" +%y%m%d151029Z)
-fi
+
+
+# 测试证书的有效期：起始设为当前年份前一年的 10 月 29 日 15:10:29，结束设为当前年份后两年的同一时间。
+CURRENT_YEAR=$(${SHELL_DATE} +%Y)
+YEAR_PREV=$((CURRENT_YEAR - 1))
+YEAR_PLUS_TWO=$((CURRENT_YEAR + 2))
+
+CONF_STARTDATE_TEST=$(printf "%02d1029151029Z" $((YEAR_PREV % 100)))
+CONF_ENDDATE_TEST=$(printf "%02d1029151029Z" $((YEAR_PLUS_TWO % 100)))
+
+
 CONF_SERIAL=E3E3E3
 
 CONF_KEY_CA=ca.${CONF_DOMAIN}.key

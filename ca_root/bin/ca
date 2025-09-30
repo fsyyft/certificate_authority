@@ -218,10 +218,11 @@ function sign_ca_vpn_openvpn () {
 ########## ########## ########## ########## ##########
 # 生成测试颁发机构证书请求文件。
 function req_ca_test () {
+    CONF_EXTENSIONS=v3_ca_test_req
     req_common  ${CONF_KEY_CA_TEST}                             \
                 ${CONF_CSR_CA_TEST}                             \
                 ${CONF_SER_CA_TEST}                             \
-                "v3_ca_test"                                    \
+                ${CONF_EXTENSIONS}                              \
                 "GlobalDevSign Test CA"                         \
                 "ca.test.${CONF_DOMAIN}"                        \
                 "GlobalDevSign Test CA"
