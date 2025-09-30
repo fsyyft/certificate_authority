@@ -91,6 +91,12 @@ CONF_CSR_TEST=${CONF_DOM_TEST}.csr
 CONF_CRT_TEST=${CONF_DOM_TEST}.crt
 CONF_SER_TEST=${CONF_SERIAL}0402010204
 
+CONF_DOM_MSTSC_PPNO_NET=mstsc.ppno.net
+CONF_KEY_MSTSC_PPNO_NET=${CONF_DOM_MSTSC_PPNO_NET}.key
+CONF_CSR_MSTSC_PPNO_NET=${CONF_DOM_MSTSC_PPNO_NET}.csr
+CONF_CRT_MSTSC_PPNO_NET=${CONF_DOM_MSTSC_PPNO_NET}.crt
+CONF_SER_MSTSC_PPNO_NET=${CONF_SERIAL}0402010105
+
 ########## ########## ########## ########## ##########
 # 生成 test.ppno.net 服务端证书请求文件。
 function req_test_ppno_net () {
@@ -113,6 +119,31 @@ function sign_test_ppno_net () {
                     ${CONF_CSR_TEST_PPNO_NET}                   \
                     ${CONF_CRT_TEST_PPNO_NET}                   \
                     ${CONF_SER_TEST_PPNO_NET}                   \
+                    ${CONF_EXTENSIONS}
+}
+
+########## ########## ########## ########## ##########
+# 生成 mstsc.ppno.net RDP 服务端证书请求文件。
+function req_mstsc_ppno_net () {
+    CONF_EXTENSIONS=v3_mstsc_ppno_net_req
+    req_common  ${CONF_KEY_MSTSC_PPNO_NET}                      \
+                ${CONF_CSR_MSTSC_PPNO_NET}                      \
+                ${CONF_SER_MSTSC_PPNO_NET}                      \
+                ${CONF_EXTENSIONS}                              \
+                "GlobalDevSign Internet Service Authority"      \
+                "mstsc.ppno.net"                                \
+                "mstsc.ppno.net"
+}
+
+########## ########## ########## ########## ##########
+# 签名 mstsc.ppno.net RDP 服务端证书。
+function sign_mstsc_ppno_net () {
+    CONF_EXTENSIONS=v3_mstsc_ppno_net
+    sign_common  ${CONF_KEY_CA_INTERNET_SERVICE}                \
+                    ${CONF_CRT_CA_INTERNET_SERVICE}             \
+                    ${CONF_CSR_MSTSC_PPNO_NET}                  \
+                    ${CONF_CRT_MSTSC_PPNO_NET}                  \
+                    ${CONF_SER_MSTSC_PPNO_NET}                  \
                     ${CONF_EXTENSIONS}
 }
 
@@ -142,6 +173,8 @@ function sign_personal_test () {
 }
 
 case $1 in
+    "req_mstsc_ppno_net") req_mstsc_ppno_net;;
+    "sign_mstsc_ppno_net") sign_mstsc_ppno_net;;
     "req_test_ppno_net") req_test_ppno_net;;
     "sign_test_ppno_net") sign_test_ppno_net;;
     "req_personal_test") req_personal_test;;
