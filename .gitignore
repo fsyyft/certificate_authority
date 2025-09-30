@@ -1,0 +1,38 @@
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor swap and backup files
+*~
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# Local environment overrides
+.env
+.env.*
+
+# OpenSSL CA generated assets
+**/certs/
+**/crl/
+**/private/
+**/newcerts/
+**/index.txt
+**/index.txt.*
+**/serial
+**/serial.*
+*.csr
+*.crt
+*.pem
+*.key
+*.key.zip
+
+# Logs and runtime traces
+*.log
+*.trace
+
+# Tooling state
+.vscode/
+.idea/

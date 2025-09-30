@@ -1,0 +1,301 @@
+#!/bin/bash
+
+# 脚本所在目录。
+# 这里要注意下，如果写 /usr/bin/cd 会有问题。
+PATH_SHELL_FOLDER=$(cd `dirname $0`;pwd)
+
+PATH_ROOT=${PATH_SHELL_FOLDER}/..
+export PATH_CA_ROOT=${PATH_ROOT}
+cd ${PATH_ROOT}
+
+. ${PATH_ROOT}/bin/functions
+echo_blue "进入工作目录：$(${SHELL_PWD})"
+
+if [ ! -d private ]; then
+    ${SHELL_MKDIR} -p private
+    if [ -d private ]; then
+        echo_yellow "检测到缺少 private 目录，已自动创建。"
+    else
+        echo_red "创建 private 目录失败，请检查权限。"
+        exit 1
+    fi
+fi
+
+if [ ! -d certs ]; then
+    ${SHELL_MKDIR} -p certs
+    if [ -d certs ]; then
+        echo_yellow "检测到缺少 certs 目录，已自动创建。"
+    else
+        echo_red "创建 certs 目录失败，请检查权限。"
+        exit 1
+    fi
+fi
+
+if [ ! -d newcerts ]; then
+    ${SHELL_MKDIR} -p newcerts
+    if [ -d newcerts ]; then
+        echo_yellow "检测到缺少 newcerts 目录，已自动创建。"
+    else
+        echo_red "创建 newcerts 目录失败，请检查权限。"
+        exit 1
+    fi
+fi
+
+PATH_CONFIG=${PATH_ROOT}/conf/ca.${CONF_DOMAIN}.conf
+
+########## ########## ########## ########## ##########
+# 打印脚本用法说明。
+function show_usage() {
+    local invalid_command=$1
+
+    if [ -n "${invalid_command}" ]; then
+        echo_red "未知命令：${invalid_command}"
+        echo
+    fi
+
+    ${SHELL_ECHO} "用法：${0##*/} <命令> [参数]"
+    ${SHELL_ECHO} ""
+    ${SHELL_ECHO} "可用命令："
+    printf "  %-36s %s\n" "req_ca" "生成根证书请求文件"
+    printf "  %-36s %s\n" "selfsign_ca" "自签名根证书"
+    printf "  %-36s %s\n" "req_ca_vpn" "生成 VPN 颁发机构证书请求文件"
+    printf "  %-36s %s\n" "sign_ca_vpn" "签名 VPN 颁发机构证书"
+    printf "  %-36s %s\n" "req_ca_internet" "生成 Internet 颁发机构证书请求文件"
+    printf "  %-36s %s\n" "sign_ca_internet" "签名 Internet 颁发机构证书"
+    printf "  %-36s %s\n" "req_ca_internet_service" "生成 Internet Service 颁发机构证书请求文件"
+    printf "  %-36s %s\n" "sign_ca_internet_service" "签名 Internet Service 颁发机构证书"
+    printf "  %-36s %s\n" "req_ca_internet_personal" "生成 Internet Personal 颁发机构证书请求文件"
+    printf "  %-36s %s\n" "sign_ca_internet_personal" "签名 Internet Personal 颁发机构证书"
+    printf "  %-36s %s\n" "req_ca_vpn_openvpn" "生成 OpenVPN 颁发机构证书请求文件"
+    printf "  %-36s %s\n" "sign_ca_vpn_openvpn" "签名 OpenVPN 颁发机构证书"
+    printf "  %-36s %s\n" "req_ca_test" "生成测试颁发机构证书请求文件"
+    printf "  %-36s %s\n" "sign_ca_test" "签名测试颁发机构证书"
+    printf "  %-36s %s\n" "genkey <name> <length> <password>" "生成密钥并压缩到 private 目录（参数依次为名称、长度、密码）"
+}
+
+########## ########## ########## ########## ##########
+# 生成根证书请求文件。
+function req_ca () {
+    CONF_EXTENSIONS=v3_ca_root_req
+    req_common  ${CONF_KEY_CA}                                  \
+                ${CONF_CSR_CA}                                  \
+                ${CONF_SER_CA}                                  \
+                ${CONF_EXTENSIONS}                              \
+                "GlobalDevSign Root CA"                         \
+                "ca.${CONF_DOMAIN}"                             \
+                "GlobalDevSign Root CA"
+}
+
+########## ########## ########## ########## ##########
+# 自签名根证书。
+function selfsign_ca () {
+    CONF_EXTENSIONS=v3_ca_root
+
+    # 删除私钥。
+    rm_file private/${CONF_KEY_CA}
+
+    unzip_key ${CONF_KEY_CA}
+
+    if [ ! -f private/${CONF_KEY_CA} ]; then
+        echo_yellow "解压密钥失败。"
+        exit
+    fi
+
+    # 设置当前使用的序列号。
+    ${SHELL_ECHO} ${CONF_SER_CA} > serial
+
+    # 删除数据库中的当前使用的序列号。
+    del_exists_serial ${CONF_SER_CA}
+
+    ${SHELL_OPENSSL} ca                                         \
+                    -selfsign                                   \
+                    -config ${PATH_CONFIG}                      \
+                    -extensions ${CONF_EXTENSIONS}              \
+                    -startdate ${CONF_STARTDATE_ROOT}           \
+                    -enddate ${CONF_ENDDATE_ROOT}               \
+                    -keyfile private/${CONF_KEY_CA}             \
+                    -in certs/${CONF_CSR_CA}                    \
+                    -out certs/${CONF_CRT_CA}
+
+    ${SHELL_RM} -rf private/${CONF_KEY_CA}
+
+    if [ -f certs/${CONF_CRT_CA} ]; then
+        echo_blue "签名完成。"
+    else
+        echo_yellow "签名失败。"
+    fi
+}
+
+########## ########## ########## ########## ##########
+# 生成 Internet 颁发机构证书请求文件。
+function req_ca_internet () {
+    CONF_EXTENSIONS=v3_ca_internet_req
+    req_common  ${CONF_KEY_CA_INTERNET}                         \
+                ${CONF_CSR_CA_INTERNET}                         \
+                ${CONF_SER_CA_INTERNET}                         \
+                ${CONF_EXTENSIONS}                              \
+                "GlobalDevSign Internet Authority"              \
+                "ca.internet.${CONF_DOMAIN}"                    \
+                "GlobalDevSign Internet Authority"
+}
+
+########## ########## ########## ########## ##########
+# 签名 Internet 颁发机构证书。
+function sign_ca_internet () {
+    sign_common  ${CONF_KEY_CA}                                 \
+                    ${CONF_CRT_CA}                              \
+                    ${CONF_CSR_CA_INTERNET}                     \
+                    ${CONF_CRT_CA_INTERNET}                     \
+                    ${CONF_SER_CA_INTERNET}                     \
+                    "v3_ca_internet"
+}
+
+########## ########## ########## ########## ##########
+# 生成 Internet Service  颁发机构证书请求文件。
+function req_ca_internet_service () {
+    CONF_EXTENSIONS=v3_ca_internet_service_req
+    req_common  ${CONF_KEY_CA_INTERNET_SERVICE}                 \
+                ${CONF_CSR_CA_INTERNET_SERVICE}                 \
+                ${CONF_SER_CA_INTERNET_SERVICE}                 \
+                ${CONF_EXTENSIONS}                              \
+                "GlobalDevSign Internet Service Authority"      \
+                "ca.service.internet.${CONF_DOMAIN}"            \
+                "GlobalDevSign Internet Service Authority"
+}
+
+########## ########## ########## ########## ##########
+# 签名 Internet Internet 颁发机构证书。
+function sign_ca_internet_service () {
+    sign_common  ${CONF_KEY_CA_INTERNET}                        \
+                    ${CONF_CRT_CA_INTERNET}                     \
+                    ${CONF_CSR_CA_INTERNET_SERVICE}             \
+                    ${CONF_CRT_CA_INTERNET_SERVICE}             \
+                    ${CONF_SER_CA_INTERNET_SERVICE}             \
+                    "v3_ca_internet_service"                    \
+                    ${CONF_STARTDATE}                           \
+                    ${CONF_ENDDATE}
+}
+
+########## ########## ########## ########## ##########
+# 生成 Internet Personal  颁发机构证书请求文件。
+function req_ca_internet_personal () {
+    CONF_EXTENSIONS=v3_ca_vpn_openvpn_req
+    req_common  ${CONF_KEY_CA_INTERNET_PERSONAL}                \
+                ${CONF_CSR_CA_INTERNET_PERSONAL}                \
+                ${CONF_SER_CA_INTERNET_PERSONAL}                \
+                ${CONF_EXTENSIONS}                              \
+                "GlobalDevSign Internet Personal Authority"     \
+                "ca.personal.internet.${CONF_DOMAIN}"           \
+                "GlobalDevSign Internet Personal Authority"
+}
+
+########## ########## ########## ########## ##########
+# 签名 Internet Personal 颁发机构证书。
+function sign_ca_internet_personal () {
+    sign_common  ${CONF_KEY_CA_INTERNET}                        \
+                    ${CONF_CRT_CA_INTERNET}                     \
+                    ${CONF_CSR_CA_INTERNET_PERSONAL}            \
+                    ${CONF_CRT_CA_INTERNET_PERSONAL}            \
+                    ${CONF_SER_CA_INTERNET_PERSONAL}            \
+                    "v3_ca_internet_personal"                   \
+                    ${CONF_STARTDATE}                           \
+                    ${CONF_ENDDATE}
+}
+
+
+########## ########## ########## ########## ##########
+# 生成 VPN 颁发机构证书请求文件。
+function req_ca_vpn () {
+    CONF_EXTENSIONS=v3_ca_vpn_req
+    req_common  ${CONF_KEY_CA_VPN}                              \
+                ${CONF_CSR_CA_VPN}                              \
+                ${CONF_SER_CA_VPN}                              \
+                ${CONF_EXTENSIONS}                              \
+                "GlobalDevSign VPN Authority"                   \
+                "ca.vpn.${CONF_DOMAIN}"                         \
+                "GlobalDevSign VPN Authority"
+}
+
+########## ########## ########## ########## ##########
+# 签名 VPN 颁发机构证书。
+function sign_ca_vpn () {
+    sign_common  ${CONF_KEY_CA}                                 \
+                    ${CONF_CRT_CA}                              \
+                    ${CONF_CSR_CA_VPN}                          \
+                    ${CONF_CRT_CA_VPN}                          \
+                    ${CONF_SER_CA_VPN}                          \
+                    "v3_ca_vpn"
+}
+
+########## ########## ########## ########## ##########
+# 生成 OpenVPN 颁发机构证书请求文件。
+function req_ca_vpn_openvpn () {
+    CONF_EXTENSIONS=v3_ca_vpn_openvpn_req
+    req_common  ${CONF_KEY_CA_VPN_OPENVPN}                      \
+                ${CONF_CSR_CA_VPN_OPENVPN}                      \
+                ${CONF_SER_CA_VPN_OPENVPN}                      \
+                ${CONF_EXTENSIONS}                              \
+                "GlobalDevSign OpenVPN Authority"               \
+                "ca.openvpn.vpn.${CONF_DOMAIN}"                 \
+                "GlobalDevSign OpenVPN Authority"
+}
+
+########## ########## ########## ########## ##########
+# 签名 OpenVPN 颁发机构证书。
+function sign_ca_vpn_openvpn () {
+    sign_common  ${CONF_KEY_CA_VPN}                             \
+                    ${CONF_CRT_CA_VPN}                          \
+                    ${CONF_CSR_CA_VPN_OPENVPN}                  \
+                    ${CONF_CRT_CA_VPN_OPENVPN}                  \
+                    ${CONF_SER_CA_VPN_OPENVPN}                  \
+                    "v3_ca_vpn_openvpn"                         \
+                    ${CONF_STARTDATE}                           \
+                    ${CONF_ENDDATE}
+}
+
+
+########## ########## ########## ########## ##########
+# 生成测试颁发机构证书请求文件。
+function req_ca_test () {
+    CONF_EXTENSIONS=v3_ca_test_req
+    req_common  ${CONF_KEY_CA_TEST}                             \
+                ${CONF_CSR_CA_TEST}                             \
+                ${CONF_SER_CA_TEST}                             \
+                ${CONF_EXTENSIONS}                              \
+                "GlobalDevSign Test CA"                         \
+                "ca.test.${CONF_DOMAIN}"                        \
+                "GlobalDevSign Test CA"
+}
+
+########## ########## ########## ########## ##########
+# 签名测试颁发机构证书。
+function sign_ca_test () {
+    sign_common  ${CONF_KEY_CA}                                 \
+                    ${CONF_CRT_CA}                              \
+                    ${CONF_CSR_CA_TEST}                         \
+                    ${CONF_CRT_CA_TEST}                         \
+                    ${CONF_SER_CA_TEST}                         \
+                    "v3_ca_test"                                \
+                    ${CONF_STARTDATE_TEST}                      \
+                    ${CONF_ENDDATE_TEST}
+}
+
+case $1 in
+    "req_ca") req_ca ;;
+    "selfsign_ca") selfsign_ca ;;
+    "req_ca_vpn") req_ca_vpn ;;
+    "sign_ca_vpn") sign_ca_vpn;;
+    "req_ca_internet") req_ca_internet;;
+    "sign_ca_internet") sign_ca_internet;;
+    "req_ca_internet_service") req_ca_internet_service;;
+    "sign_ca_internet_service") sign_ca_internet_service;;
+    "req_ca_internet_personal") req_ca_internet_personal;;
+    "sign_ca_internet_personal") sign_ca_internet_personal;;
+    "req_ca_vpn_openvpn") req_ca_vpn_openvpn;;
+    "sign_ca_vpn_openvpn") sign_ca_vpn_openvpn;;
+    "req_ca_test") req_ca_test;;
+    "sign_ca_test") sign_ca_test;;
+    "genkey") genkey  $2 $3 $4 $4;;
+    "help"|"-h"|"--help"|"") show_usage "" ;;
+    *) show_usage "$1"; exit 0 ;;
+esac
