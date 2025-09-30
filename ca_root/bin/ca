@@ -20,15 +20,26 @@ if [ ! -d private ]; then
     fi
 fi
 
+if [ ! -d certs ]; then
+    ${SHELL_MKDIR} -p certs
+    if [ -d certs ]; then
+        echo_yellow "检测到缺少 certs 目录，已自动创建。"
+    else
+        echo_red "创建 certs 目录失败，请检查权限。"
+        exit 1
+    fi
+fi
+
 PATH_CONFIG=${PATH_ROOT}/conf/ca.${CONF_DOMAIN}.conf
 
 ########## ########## ########## ########## ##########
 # 生成根证书请求文件。
 function req_ca () {
+    CONF_EXTENSIONS=v3_ca_root_req
     req_common  ${CONF_KEY_CA}                                  \
                 ${CONF_CSR_CA}                                  \
                 ${CONF_SER_CA}                                  \
-                "v3_ca_root"                                    \
+                ${CONF_EXTENSIONS}                              \
                 "GlobalDevSign Root CA"                         \
                 "ca.${CONF_DOMAIN}"                             \
                 "GlobalDevSign Root CA"

@@ -24,7 +24,11 @@
 
 ```
 [fsyyft@kvm-centos7-openssl pki]# cd /data/pki/
-[fsyyft@kvm-centos7-openssl pki]# ca_root/bin/ca genkey ca.ppno.net 4096 123456 123456
+[fsyyft@kvm-centos7-openssl pki]# export ENV_KEY_NAME="ca.ppno.net"
+[fsyyft@kvm-centos7-openssl pki]# export ENV_KEY_SIZE="512"
+[fsyyft@kvm-centos7-openssl pki]# export ENV_KEY_PASS="123456"
+[fsyyft@kvm-centos7-openssl pki]# export ENV_ZIP_PASS="123456"
+[fsyyft@kvm-centos7-openssl pki]# ca_root/bin/ca genkey "$ENV_KEY_NAME" "$ENV_KEY_SIZE" "$ENV_KEY_PASS" "$ENV_ZIP_PASS"
 [fsyyft@kvm-centos7-openssl pki]# ca_root/bin/ca req_ca
 [fsyyft@kvm-centos7-openssl pki]# ca_root/bin/ca selfsign_ca
 ```
