@@ -115,3 +115,31 @@ openssl req -noout -text -in ca.ppno.net.csr
 ```
 openssl x509 -noout -text -in ca.ppno.net.crt
 ```
+
+只查看开始与结束时间
+
+```
+openssl x509 -noout -dates -in ca.ppno.net.crt
+```
+
+### 证书解密
+
+```
+openssl rsa -in ca.ppno.net.encode.key -out ca.ppno.net.decode.key
+```
+
+### 证书加密
+
+这类带口令的私钥加密并不会生成“固定密文”。原因是 PKCS#8 (PBES2) 里包含随机盐（salt）和初始向量（IV）；每次运行都会随机生成它们，导致整体密文内容不同，即使私钥、口令、算法都相同。
+
+```
+openssl pkcs8 -topk8 -v2 aes-256-cbc -in ca.ppno.net.decode.key -out ca.ppno.net.encode.key
+```
+
+```
+openssl rsa -aes256 -in ca.ppno.net.decode.key -out ca.ppno.net.encode.key
+```
+
+```
+openssl rsa -des3 -in ca.ppno.net.decode.key -out ca.ppno.net.encode.key
+```
