@@ -12,7 +12,7 @@ cd ${PATH_ROOT}
 . ${PATH_ROOT}/../ca_root/bin/functions
 echo_blue 进入工作目录：$(${SHELL_PWD})
 
-# 域名后缀
+# 域名后缀。
 DOMAIN_SUFFIX="openvpn.ppno.net"
 
 # 服务端配置列表：格式为 name:id:ip。
@@ -22,7 +22,7 @@ declare -a servers=(
     "wd:D5:172.27.213.1"
 )
 
-# 客户端配置列表：格式为 name:id:ip
+# 客户端配置列表：格式为 name:id:ip。
 declare -a clients=(
     "teach.home:06:172.27.XXX.6"
     "hp.home:0A:172.27.XXX.10"
@@ -74,27 +74,33 @@ function server() {
     SERVER_NAME=$1
     SERVER_ID=00
     SERVER_IP="172.27.XXX.1"
+    FOUND=0
 
     for server in "${servers[@]}"; do
         IFS=':' read -r name id ip <<< "$server"
         if [ "$name" = "$SERVER_NAME" ]; then
             SERVER_ID=$id
             SERVER_IP=$ip
+            FOUND=1
             break
         fi
     done
 
-    echo_yellow "OpenVPN 服务端 ID：${SERVER_ID}"
-    echo_yellow "OpenVPN 服务端 IP：${SERVER_IP}"
+    if [ $FOUND -eq 0 ]; then
+        echo_red "错误：找不到服务端配置 '${SERVER_NAME}'"
+    else
+        echo_yellow "OpenVPN 服务端 ID：${SERVER_ID}"
+        echo_yellow "OpenVPN 服务端 IP：${SERVER_IP}"
 
-    echo_yellow "开始生成请求证书。"
-    ${PATH_CMD} req_vpn_openvpn_server ${SERVER_NAME} ${SERVER_ID} ${SERVER_IP}
-    echo_yellow "完成生成请求证书。"
-    echo_yellow "开始请求证书签名。"
-    ${PATH_CMD} sign_vpn_openvpn_server ${SERVER_NAME} ${SERVER_ID} ${SERVER_IP}
-    echo_yellow "完成请求证书签名。"
+        echo_yellow "开始生成请求证书。"
+        ${PATH_CMD} req_vpn_openvpn_server ${SERVER_NAME} ${SERVER_ID} ${SERVER_IP}
+        echo_yellow "完成生成请求证书。"
+        echo_yellow "开始请求证书签名。"
+        ${PATH_CMD} sign_vpn_openvpn_server ${SERVER_NAME} ${SERVER_ID} ${SERVER_IP}
+        echo_yellow "完成请求证书签名。"
     
-    ${SHELL_LS} -la certs/| ${SHELL_GREP} ${SERVER_NAME}
+        ${SHELL_LS} -la certs/| ${SHELL_GREP} ${SERVER_NAME}
+    fi
 }
 
 ########## ########## ########## ########## ##########
@@ -104,27 +110,33 @@ function client() {
     CLIENT_NAME=$1
     CLIENT_ID=00
     CLIENT_IP="172.27.XXX.0"
+    FOUND=0
 
     for client in "${clients[@]}"; do
         IFS=':' read -r name id ip <<< "$client"
         if [ "$name" = "$CLIENT_NAME" ]; then
             CLIENT_ID=$id
             CLIENT_IP=$ip
+            FOUND=1
             break
         fi
     done
 
-    echo_yellow "OpenVPN 客户端 ID：${CLIENT_ID}"
-    echo_yellow "OpenVPN 客户端 IP：${CLIENT_IP}"
+    if [ $FOUND -eq 0 ]; then
+        echo_red "错误：找不到客户端配置 '${CLIENT_NAME}'"
+    else
+        echo_yellow "OpenVPN 客户端 ID：${CLIENT_ID}"
+        echo_yellow "OpenVPN 客户端 IP：${CLIENT_IP}"
 
-    echo_yellow "开始生成请求证书。"
-    ${PATH_CMD} req_vpn_openvpn_client ${CLIENT_NAME} ${CLIENT_ID} ${CLIENT_IP}
-    echo_yellow "完成生成请求证书。"
-    echo_yellow "开始请求证书签名。"
-    ${PATH_CMD} sign_vpn_openvpn_client ${CLIENT_NAME} ${CLIENT_ID} ${CLIENT_IP}
-    echo_yellow "完成请求证书签名。"
-    
-    ${SHELL_LS} -la certs/ | ${SHELL_GREP} ${CLIENT_NAME}
+        echo_yellow "开始生成请求证书。"
+        ${PATH_CMD} req_vpn_openvpn_client ${CLIENT_NAME} ${CLIENT_ID} ${CLIENT_IP}
+        echo_yellow "完成生成请求证书。"
+        echo_yellow "开始请求证书签名。"
+        ${PATH_CMD} sign_vpn_openvpn_client ${CLIENT_NAME} ${CLIENT_ID} ${CLIENT_IP}
+        echo_yellow "完成请求证书签名。"
+        
+        ${SHELL_LS} -la certs/ | ${SHELL_GREP} ${CLIENT_NAME}
+    fi
 }
 
 ########## ########## ########## ########## ##########
