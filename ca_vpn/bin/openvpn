@@ -12,6 +12,36 @@ cd ${PATH_ROOT}
 . ${PATH_ROOT}/../ca_root/bin/functions
 echo_blue 进入工作目录：$(${SHELL_PWD})
 
+# 域名后缀
+DOMAIN_SUFFIX="openvpn.ppno.net"
+
+# 客户端配置列表：格式为 name:id:ip
+declare -a clients=(
+    "teach.home:06:172.27.XXX.6"
+    "hp.home:0A:172.27.XXX.10"
+    "test.home:0E:172.27.XXX.14"
+    "mac.home:12:172.27.XXX.18"
+    "stock.home:16:172.27.XXX.22"
+    "asus.home:1A:172.27.XXX.26"
+    "route.home:1E:172.27.XXX.30"
+    "temp.virtual:22:172.27.XXX.34"
+    "internet.virtual:26:172.27.XXX.38"
+    "research.virtual:2A:172.27.XXX.42"
+    "test.virtual:2E:172.27.XXX.46"
+    "vps:32:172.27.XXX.50"
+    "test.work:36:172.27.XXX.54"
+    "dev.work:3A:172.27.XXX.58"
+    "transfer.work:3E:172.27.XXX.62"
+    "beta.work:42:172.27.XXX.66"
+    "ffs.mobile:46:172.27.XXX.70"
+    "test.mobile:4A:172.27.XXX.74"
+    "cz.mobile:4E:172.27.XXX.78"
+    "ipad.mobile:52:172.27.XXX.82"
+    "fsc.mobile:56:172.27.XXX.86"
+    "iphone.mobile:5A:172.27.XXX.90"
+    "csy.mobile:5E:172.27.XXX.94"
+)
+
 ########## ########## ########## ########## ##########
 # 打印脚本用法说明。
 function show_usage() {
@@ -75,33 +105,6 @@ function client() {
     CLIENT_ID=00
     CLIENT_IP="172.27.XXX.0"
 
-    # 客户端配置列表：格式为 name:id:ip
-    declare -a clients=(
-        "teach.home:06:172.27.XXX.6"
-        "hp.home:0A:172.27.XXX.10"
-        "test.home:0E:172.27.XXX.14"
-        "mac.home:12:172.27.XXX.18"
-        "stock.home:16:172.27.XXX.22"
-        "asus.home:1A:172.27.XXX.26"
-        "route.home:1E:172.27.XXX.30"
-        "temp.virtual:22:172.27.XXX.34"
-        "internet.virtual:26:172.27.XXX.38"
-        "research.virtual:2A:172.27.XXX.42"
-        "test.virtual:2E:172.27.XXX.46"
-        "vps:32:172.27.XXX.50"
-        "test.work:36:172.27.XXX.54"
-        "dev.work:3A:172.27.XXX.58"
-        "transfer.work:3E:172.27.XXX.62"
-        "beta.work:42:172.27.XXX.66"
-        "ffs.mobile:46:172.27.XXX.70"
-        "test.mobile:4A:172.27.XXX.74"
-        "cz.mobile:4E:172.27.XXX.78"
-        "ipad.mobile:52:172.27.XXX.82"
-        "fsc.mobile:56:172.27.XXX.86"
-        "iphone.mobile:5A:172.27.XXX.90"
-        "csy.mobile:5E:172.27.XXX.94"
-    )
-
     for client in "${clients[@]}"; do
         IFS=':' read -r name id ip <<< "$client"
         if [ "$name" = "$CLIENT_NAME" ]; then
@@ -135,56 +138,15 @@ function genkey() {
     ZIP_PASS=$3
 
     # 服务端证书：xx.server.openvpn.ppno.net。
-    ${PATH_CMD} genkey qd.server.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    ${PATH_CMD} genkey xjp.server.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    ${PATH_CMD} genkey pi.server.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
+    ${PATH_CMD} genkey qd.server.${DOMAIN_SUFFIX} ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
+    ${PATH_CMD} genkey xjp.server.${DOMAIN_SUFFIX} ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
+    ${PATH_CMD} genkey pi.server.${DOMAIN_SUFFIX} ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
 
-    # 172.27.XXX.6
-    ${PATH_CMD} genkey teach.home.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.10
-    ${PATH_CMD} genkey hp.home.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.14
-    ${PATH_CMD} genkey test.home.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.18
-    ${PATH_CMD} genkey mac.home.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.22
-    ${PATH_CMD} genkey stock.home.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.26
-    ${PATH_CMD} genkey asus.home.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.30
-    ${PATH_CMD} genkey route.home.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.34
-    ${PATH_CMD} genkey temp.virtual.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.38
-    ${PATH_CMD} genkey internet.virtual.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.42
-    ${PATH_CMD} genkey research.virtual.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.46
-    ${PATH_CMD} genkey test.virtual.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.50
-    ${PATH_CMD} genkey vps.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.54
-    ${PATH_CMD} genkey test.work.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.58
-    ${PATH_CMD} genkey dev.work.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.62
-    ${PATH_CMD} genkey transfer.work.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.66
-    ${PATH_CMD} genkey beta.work.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.70
-    ${PATH_CMD} genkey ffs.mobile.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.74
-    ${PATH_CMD} genkey test.mobile.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.78
-    ${PATH_CMD} genkey cz.mobile.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.82
-    ${PATH_CMD} genkey ipad.mobile.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.86
-    ${PATH_CMD} genkey fsc.mobile.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.90
-    ${PATH_CMD} genkey iphone.mobile.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.94
-    ${PATH_CMD} genkey csy.mobile.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
+    # 客户端证书：使用循环生成。
+    for client in "${clients[@]}"; do
+        IFS=':' read -r name id ip <<< "$client"
+        ${PATH_CMD} genkey ${name}.${DOMAIN_SUFFIX} ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
+    done
 }
 
 case $1 in
