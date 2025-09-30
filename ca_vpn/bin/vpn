@@ -10,6 +10,24 @@ cd ${PATH_ROOT}
 . ${PATH_ROOT}/../ca_root/bin/functions
 echo_blue "进入工作目录：$(${SHELL_PWD})"
 
+# 检查并创建必要的目录
+function check_and_create_dirs() {
+    local dirs=("private" "certs" "newcerts")
+    for dir in "${dirs[@]}"; do
+        if [ ! -d "$dir" ]; then
+            ${SHELL_MKDIR} -p "$dir"
+            if [ -d "$dir" ]; then
+                echo_yellow "检测到缺少 $dir 目录，已自动创建。"
+            else
+                echo_red "创建 $dir 目录失败，请检查权限。"
+                exit 1
+            fi
+        fi
+    done
+}
+
+check_and_create_dirs
+
 ########## ########## ########## ########## ##########
 # 打印脚本用法说明。
 function show_usage() {
@@ -29,36 +47,6 @@ function show_usage() {
     printf "  %-44s %s\n" "sign_vpn_openvpn_client <name> <id> <ip>" "签名 OpenVPN 客户端证书"
     printf "  %-44s %s\n" "genkey <length> <key-pass> <zip-pass>" "批量生成密钥并压缩到 private 目录"
 }
-
-if [ ! -d private ]; then
-    ${SHELL_MKDIR} -p private
-    if [ -d private ]; then
-        echo_yellow "检测到缺少 private 目录，已自动创建。"
-    else
-        echo_red "创建 private 目录失败，请检查权限。"
-        exit 1
-    fi
-fi
-
-if [ ! -d certs ]; then
-    ${SHELL_MKDIR} -p certs
-    if [ -d certs ]; then
-        echo_yellow "检测到缺少 certs 目录，已自动创建。"
-    else
-        echo_red "创建 certs 目录失败，请检查权限。"
-        exit 1
-    fi
-fi
-
-if [ ! -d newcerts ]; then
-    ${SHELL_MKDIR} -p newcerts
-    if [ -d newcerts ]; then
-        echo_yellow "检测到缺少 newcerts 目录，已自动创建。"
-    else
-        echo_red "创建 newcerts 目录失败，请检查权限。"
-        exit 1
-    fi
-fi
 
 PATH_CONFIG=${PATH_ROOT}/conf/vpn.conf
 
