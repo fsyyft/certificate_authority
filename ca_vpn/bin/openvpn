@@ -15,6 +15,13 @@ echo_blue 进入工作目录：$(${SHELL_PWD})
 # 域名后缀
 DOMAIN_SUFFIX="openvpn.ppno.net"
 
+# 服务端配置列表：格式为 name:id:ip。
+declare -a servers=(
+    "qd:35:172.27.53.1"
+    "pi:0A:172.27.16.1"
+    "wd:D5:172.27.213.1"
+)
+
 # 客户端配置列表：格式为 name:id:ip
 declare -a clients=(
     "teach.home:06:172.27.XXX.6"
@@ -67,13 +74,6 @@ function server() {
     SERVER_NAME=$1
     SERVER_ID=00
     SERVER_IP="172.27.XXX.1"
-
-    # 服务器配置列表：格式为 name:id:ip
-    declare -a servers=(
-        "qd:35:172.27.53.1"
-        "pi:0A:172.27.16.1"
-        "wd:D5:172.27.213.1"
-    )
 
     for server in "${servers[@]}"; do
         IFS=':' read -r name id ip <<< "$server"
@@ -137,15 +137,24 @@ function genkey() {
     KEY_PASS=$2
     ZIP_PASS=$3
 
-    # 服务端证书：xx.server.openvpn.ppno.net。
-    ${PATH_CMD} genkey qd.server.${DOMAIN_SUFFIX} ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    ${PATH_CMD} genkey xjp.server.${DOMAIN_SUFFIX} ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    ${PATH_CMD} genkey pi.server.${DOMAIN_SUFFIX} ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
+    # 服务端证书：使用循环生成。
+    for server in "${servers[@]}"; do
+        IFS=':' read -r name id ip <<< "$server"
+        echo "------------------------------------------"
+        keyname=${name}.server.${DOMAIN_SUFFIX}
+        echo "生成服务端密钥：${keyname}, IP: ${ip}"
+        ${PATH_CMD} genkey ${keyname} ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
+        echo "------------------------------------------"
+    done
 
     # 客户端证书：使用循环生成。
     for client in "${clients[@]}"; do
         IFS=':' read -r name id ip <<< "$client"
-        ${PATH_CMD} genkey ${name}.${DOMAIN_SUFFIX} ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
+        echo "------------------------------------------"
+        keyname=${name}.${DOMAIN_SUFFIX}
+        echo "生成客户端密钥：${keyname}, IP: ${ip}"
+        ${PATH_CMD} genkey ${keyname} ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
+        echo "------------------------------------------"
     done
 }
 
