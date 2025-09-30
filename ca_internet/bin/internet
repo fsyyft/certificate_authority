@@ -5,11 +5,29 @@
 PATH_SHELL_FOLDER=$(cd `dirname $0`;pwd)
 
 PATH_ROOT=${PATH_SHELL_FOLDER}/..
+export PATH_CA_ROOT=${PATH_ROOT}
 cd ${PATH_ROOT}
 
-. ${PATH_ROOT}/../../shell/functions
 . ${PATH_ROOT}/../ca_root/bin/functions
 echo_blue "进入工作目录：$(${SHELL_PWD})"
+
+# 检查并创建必要的目录。
+function check_and_create_dirs() {
+    local dirs=("private" "certs" "newcerts")
+    for dir in "${dirs[@]}"; do
+        if [ ! -d "$dir" ]; then
+            ${SHELL_MKDIR} -p "$dir"
+            if [ -d "$dir" ]; then
+                echo_yellow "检测到缺少 $dir 目录，已自动创建。"
+            else
+                echo_red "创建 $dir 目录失败，请检查权限。"
+                exit 1
+            fi
+        fi
+    done
+}
+
+check_and_create_dirs
 
 PATH_CONFIG=${PATH_ROOT}/conf/internet.conf
 
@@ -28,10 +46,11 @@ CONF_SER_TEST=${CONF_SERIAL}0402010204
 ########## ########## ########## ########## ##########
 # 生成 test.ppno.net 服务端证书请求文件。
 function req_test_ppno_net () {
+    CONF_EXTENSIONS=v3_test_ppno_net_req
     req_common  ${CONF_KEY_TEST_PPNO_NET}                       \
                 ${CONF_CSR_TEST_PPNO_NET}                       \
                 ${CONF_SER_TEST_PPNO_NET}                       \
-                "v3_test_ppno_net"                              \
+                ${CONF_EXTENSIONS}                              \
                 "GlobalDevSign Internet Service Authority"      \
                 "test.ppno.net"                                 \
                 "test.ppno.net"
@@ -40,21 +59,23 @@ function req_test_ppno_net () {
 ########## ########## ########## ########## ##########
 # 签名 test.ppno.net 服务端证书。
 function sign_test_ppno_net () {
+    CONF_EXTENSIONS=v3_test_ppno_net
     sign_common  ${CONF_KEY_CA_INTERNET_SERVICE}                \
                     ${CONF_CRT_CA_INTERNET_SERVICE}             \
                     ${CONF_CSR_TEST_PPNO_NET}                   \
                     ${CONF_CRT_TEST_PPNO_NET}                   \
                     ${CONF_SER_TEST_PPNO_NET}                   \
-                    "v3_test_ppno_net"
+                    ${CONF_EXTENSIONS}
 }
 
 ########## ########## ########## ########## ##########
 # 生成 test 用户证书请求文件。
 function req_personal_test () {
+    CONF_EXTENSIONS=v3_personal_test_req
     req_common  ${CONF_KEY_TEST}                                \
                 ${CONF_CSR_TEST}                                \
                 ${CONF_SER_TEST}                                \
-                "v3_personal_test"                              \
+                ${CONF_EXTENSIONS}                              \
                 "GlobalDevSign Internet Personal Authority"     \
                 "user test"                                     \
                 "user test"
@@ -63,12 +84,13 @@ function req_personal_test () {
 ########## ########## ########## ########## ##########
 # 签名 test 用户证书。
 function sign_personal_test () {
+    CONF_EXTENSIONS=v3_personal_test
     sign_common  ${CONF_KEY_CA_INTERNET_PERSONAL}               \
                     ${CONF_CRT_CA_INTERNET_PERSONAL}            \
                     ${CONF_CSR_TEST}                            \
                     ${CONF_CRT_TEST}                            \
                     ${CONF_SER_TEST}                            \
-                    "v3_personal_test"
+                    ${CONF_EXTENSIONS}
 }
 
 case $1 in
