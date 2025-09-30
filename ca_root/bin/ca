@@ -99,10 +99,11 @@ function selfsign_ca () {
 ########## ########## ########## ########## ##########
 # 生成 Internet 颁发机构证书请求文件。
 function req_ca_internet () {
+    CONF_EXTENSIONS=v3_ca_internet_req
     req_common  ${CONF_KEY_CA_INTERNET}                         \
                 ${CONF_CSR_CA_INTERNET}                         \
                 ${CONF_SER_CA_INTERNET}                         \
-                "v3_ca_internet"                                \
+                ${CONF_EXTENSIONS}                              \
                 "GlobalDevSign Internet Authority"              \
                 "ca.internet.${CONF_DOMAIN}"                    \
                 "GlobalDevSign Internet Authority"

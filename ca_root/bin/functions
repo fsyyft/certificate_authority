@@ -80,6 +80,21 @@ CONF_ENDDATE_ROOT=33151029151029Z
 CONF_STARTDATE=20151029151029Z
 # 证书的有效期结束时间。
 CONF_ENDDATE=22251029151029Z
+# 如果外部通过环境变量提供证书失效时间，先校验格式是否符合 YYYYMMDDhhmmssZ。
+if [ -n "${CRT_ENDDATE:-}" ]; then
+    if [[ ! ${CRT_ENDDATE} =~ ^[0-9]{14}Z$ ]]; then
+        echo_red "环境变量 CRT_ENDDATE (${CRT_ENDDATE}) 格式不正确，应为 14 位数字加 Z，例如 ${CONF_ENDDATE}。"
+        exit 1
+    fi
+
+    # 校验长度与默认值一致（防止额外空白字符）。
+    if [ ${#CRT_ENDDATE} -ne ${#CONF_ENDDATE} ]; then
+        echo_red "环境变量 CRT_ENDDATE (${CRT_ENDDATE}) 长度(${#CRT_ENDDATE}) 与默认值(${#CONF_ENDDATE})不一致。"
+        exit 1
+    fi
+
+    CONF_ENDDATE=${CRT_ENDDATE}
+fi
 # 测试证书的有效期开始、结束时间（兼容 Linux 与 macOS）。
 if [ "$(uname)" = "Darwin" ]; then
     CONF_STARTDATE_TEST=$(${SHELL_DATE} -v-1d +%y%m%d151029Z)

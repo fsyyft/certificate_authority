@@ -9,7 +9,7 @@
 | 机构 | 0100E3 | 2015-10-29 15:10:29 | 3315-10-29 15:10:29 | ca   |             |                     |      |
 | 机构 | 020101 | -                  | -                  |      | ca.vpn      |                     |      |
 | 机构 | 03010101 | -                | -                  |      |             | ca.openvpn.vpn      |      |
-| 机构 | 020201 | -                  | -                  |      | ca.internet |                     |      |
+| 机构 | 020201 | 2015-10-29 15:10:29 | 2225-10-29 15:10:29 |      | ca.internet |                     |      |
 | 机构 | 03020101 | -                | -                  |      |             | ca.service.internet |      |
 | 机构 | 03020102 | -                | -                  |      |             | ca.personal.internet |      |
 | 机构 | 020401 | -                  | -                  |      | ca.test     |                     |      |
@@ -36,8 +36,9 @@
 - 使用根证书进行签名。
 
 ```
-[fsyyft@kvm-centos7-openssl pki]# ca_root/bin/ca genkey ca.internet.ppno.net 4096 123456 123456
+[fsyyft@kvm-centos7-openssl pki]# ca_root/bin/ca genkey ca.internet.ppno.net 1024 123456 123456
 [fsyyft@kvm-centos7-openssl pki]# ca_root/bin/ca req_ca_internet
+[fsyyft@kvm-centos7-openssl pki]# export CRT_ENDDATE=22251029151029Z
 [fsyyft@kvm-centos7-openssl pki]# ca_root/bin/ca sign_ca_internet
 ```
 
