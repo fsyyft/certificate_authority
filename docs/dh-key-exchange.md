@@ -345,7 +345,3 @@ remote-cert-tls server
   - https://www.iana.org/assignments/ikev2-parameters/ikev2-parameters.xhtml
 
 ---
-
-本文档最后更新时间：2025年10月5日
-
-**免责声明**：本文档仅供参考，不构成专业安全建议。在生产环境中使用前，请咨询专业安全专家。

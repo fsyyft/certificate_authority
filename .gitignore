@@ -19,6 +19,7 @@
 **/crl/
 **/private/
 **/newcerts/
+**/pfx/
 **/index.txt
 **/index.txt.*
 **/serial

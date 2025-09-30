@@ -66,9 +66,9 @@
 - 使用 Service CA 证书进行签名。
 
 ```
-[fsyyft@kvm-centos7-openssl pki]# ca_internet/bin/service genkey test.ppno.net 1024 123456 123456
-[fsyyft@kvm-centos7-openssl pki]# ca_internet/bin/service req_test_ppno_net
-[fsyyft@kvm-centos7-openssl pki]# ca_internet/bin/service sign_test_ppno_net
+[fsyyft@kvm-centos7-openssl pki]# ca_internet/bin/internet genkey test.ppno.net 1024 123456 123456
+[fsyyft@kvm-centos7-openssl pki]# ca_internet/bin/internet req_test_ppno_net
+[fsyyft@kvm-centos7-openssl pki]# ca_internet/bin/internet sign_test_ppno_net
 ```
 
 ##### 生成并签名 Personal CA 证书
@@ -95,9 +95,9 @@
 - 使用 Personal CA 证书进行签名。
 
 ```
-[fsyyft@kvm-centos7-openssl pki]# ca_internet/bin/service genkey test.personal 1024 123456 123456
-[fsyyft@kvm-centos7-openssl pki]# ca_internet/bin/service req_personal_test
-[fsyyft@kvm-centos7-openssl pki]# ca_internet/bin/service sign_personal_test
+[fsyyft@kvm-centos7-openssl pki]# ca_internet/bin/internet genkey test.personal 1024 123456 123456
+[fsyyft@kvm-centos7-openssl pki]# ca_internet/bin/internet req_personal_test
+[fsyyft@kvm-centos7-openssl pki]# ca_internet/bin/internet sign_personal_test
 ```
 
 ## 常用命令
