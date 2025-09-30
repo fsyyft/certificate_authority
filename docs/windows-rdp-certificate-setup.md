@@ -44,6 +44,8 @@ New-SelfSignedCertificate -DnsName "你的服务器名或IP" -CertStoreLocation 
 
 1. 按下 `Win + R` 键，输入 `mmc`，然后点击“确定”打开“管理控制台”。
 
+![打开 MMC 控制台](images/mstsc/crt_manager.png)
+
 ### 添加证书管理单元
 
 1. 在控制台菜单栏中，点击“文件” > “添加/删除管理单元”。
@@ -62,6 +64,8 @@ New-SelfSignedCertificate -DnsName "你的服务器名或IP" -CertStoreLocation 
    - **重要**：在导入过程中，确保勾选“标志此密钥为可导出的密钥”选项。
 4. 完成导入后，验证证书是否出现在“个人”存储中。
 
+![证书导入向导](images/mstsc/crt_manager_import.png)
+
 ### 设置远程桌面使用证书
 
 #### 手动配置注册表
@@ -74,6 +78,8 @@ New-SelfSignedCertificate -DnsName "你的服务器名或IP" -CertStoreLocation 
 3. 右键点击该路径，选择“新建” > “字符串值”，命名为 `SSLCertificateSHA1Hash`。
 4. 双击该新值，将证书的指纹（SHA1 哈希值）复制并粘贴到“数值数据”字段中。
 5. 点击“确定”保存更改。
+
+![注册表编辑器配置 SSLCertificateSHA1Hash](images/mstsc/regedit_SSLCertificateSHA1Hash.png)
 
 #### 使用自动生成的注册表脚本
 
@@ -94,6 +100,10 @@ reg import mstsc.ppno.net.reg
 2. 在“权限”对话框中，添加“Network Service”用户。
 3. 授予“读取”权限。
 4. 点击“应用”和“确定”。
+
+![管理私钥 - 添加用户](images/mstsc/crt_manager_key_1.png)
+
+![管理私钥 - 设置权限](images/mstsc/crt_manager_key_2.png)
 
 或者使用 PowerShell 脚本自动配置权限：
 
@@ -124,6 +134,8 @@ Restart-Service termservice -Force
 
 - **权限要求**：确保用于远程桌面连接的用户（通常是 NETWORK SERVICE）对证书私钥拥有读取权限。导入后必须手动配置私钥权限。
 - **证书类型**：如果使用自签名证书，客户端在连接时会收到安全警告，需要手动接受。对于生产环境，建议使用受信任 CA 签发的证书。
+
+![连接时的安全警告](images/mstsc/connect_alert.png)
 - **防火墙配置**：确保防火墙允许 RDP 端口（默认 3389）的入站连接。
 - **证书链完整性**：导入的 PFX 文件必须包含完整的证书链，否则 Windows 可能无法正确验证证书。
 - **备份**：在进行任何注册表修改前，建议备份注册表。
