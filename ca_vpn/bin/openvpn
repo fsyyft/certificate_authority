@@ -6,10 +6,66 @@ PATH_SHELL_FOLDER=$(cd `dirname $0`;pwd)
 
 PATH_ROOT=${PATH_SHELL_FOLDER}/..
 PATH_CMD=${PATH_ROOT}/bin/vpn
+export PATH_CA_ROOT=${PATH_ROOT}
 cd ${PATH_ROOT}
 
-. ${PATH_ROOT}/../../shell/functions
+. ${PATH_ROOT}/../ca_root/bin/functions
 echo_blue 进入工作目录：$(${SHELL_PWD})
+
+# 域名后缀。
+DOMAIN_SUFFIX="openvpn.ppno.net"
+
+# 服务端配置列表：格式为 name:id:ip。
+declare -a servers=(
+    "qd:35:172.27.53.1"
+    "pi:0A:172.27.16.1"
+    "wd:D5:172.27.213.1"
+)
+
+# 客户端配置列表：格式为 name:id:ip。
+declare -a clients=(
+    "teach.home:06:172.27.XXX.6"
+    "hp.home:0A:172.27.XXX.10"
+    "test.home:0E:172.27.XXX.14"
+    "mac.home:12:172.27.XXX.18"
+    "stock.home:16:172.27.XXX.22"
+    "asus.home:1A:172.27.XXX.26"
+    "route.home:1E:172.27.XXX.30"
+    "temp.virtual:22:172.27.XXX.34"
+    "internet.virtual:26:172.27.XXX.38"
+    "research.virtual:2A:172.27.XXX.42"
+    "test.virtual:2E:172.27.XXX.46"
+    "vps:32:172.27.XXX.50"
+    "test.work:36:172.27.XXX.54"
+    "dev.work:3A:172.27.XXX.58"
+    "transfer.work:3E:172.27.XXX.62"
+    "beta.work:42:172.27.XXX.66"
+    "ffs.mobile:46:172.27.XXX.70"
+    "test.mobile:4A:172.27.XXX.74"
+    "cz.mobile:4E:172.27.XXX.78"
+    "ipad.mobile:52:172.27.XXX.82"
+    "fsc.mobile:56:172.27.XXX.86"
+    "iphone.mobile:5A:172.27.XXX.90"
+    "csy.mobile:5E:172.27.XXX.94"
+)
+
+########## ########## ########## ########## ##########
+# 打印脚本用法说明。
+function show_usage() {
+    local invalid_command=$1
+
+    if [ -n "${invalid_command}" ]; then
+        echo_red "未知命令：${invalid_command}"
+        echo
+    fi
+
+    ${SHELL_ECHO} "用法：${0##*/} <命令> [参数]"
+    ${SHELL_ECHO} ""
+    ${SHELL_ECHO} "可用命令："
+    printf "  %-40s %s\n" "server <name>" "生成并签名 OpenVPN 服务端证书"
+    printf "  %-40s %s\n" "client <name>" "生成并签名 OpenVPN 客户端证书"
+    printf "  %-40s %s\n" "genkey <length> <key-pass> <zip-pass>" "批量生成密钥并压缩到 private 目录"
+}
 
 ########## ########## ########## ########## ##########
 # 生成并签名 OpenVPN 服务端证书。
@@ -18,30 +74,33 @@ function server() {
     SERVER_NAME=$1
     SERVER_ID=00
     SERVER_IP="172.27.XXX.1"
+    FOUND=0
 
-    case ${SERVER_NAME} in
-        "qd")
-            SERVER_ID=35
-            SERVER_IP="172.27.53.1"
-            ;;
-        "pi")
-            SERVER_ID=0A
-            SERVER_IP="172.27.16.1"
-            ;;
-    esac
+    for server in "${servers[@]}"; do
+        IFS=':' read -r name id ip <<< "$server"
+        if [ "$name" = "$SERVER_NAME" ]; then
+            SERVER_ID=$id
+            SERVER_IP=$ip
+            FOUND=1
+            break
+        fi
+    done
 
+    if [ $FOUND -eq 0 ]; then
+        echo_red "错误：找不到服务端配置 '${SERVER_NAME}'"
+    else
+        echo_yellow "OpenVPN 服务端 ID：${SERVER_ID}"
+        echo_yellow "OpenVPN 服务端 IP：${SERVER_IP}"
 
-    echo_yellow "OpenVPN 服务端 ID：${SERVER_ID}"
-    echo_yellow "OpenVPN 服务端 IP：${SERVER_IP}"
-
-    echo_yellow "开始生成请求证书。"
-    ${PATH_CMD} req_vpn_openvpn_server ${SERVER_NAME} ${SERVER_ID} ${SERVER_IP}
-    echo_yellow "完成生成请求证书。"
-    echo_yellow "开始请求证书签名。"
-    ${PATH_CMD} sign_vpn_openvpn_server ${SERVER_NAME} ${SERVER_ID} ${SERVER_IP}
-    echo_yellow "完成请求证书签名。"
+        echo_yellow "开始生成请求证书。"
+        ${PATH_CMD} req_vpn_openvpn_server ${SERVER_NAME} ${SERVER_ID} ${SERVER_IP}
+        echo_yellow "完成生成请求证书。"
+        echo_yellow "开始请求证书签名。"
+        ${PATH_CMD} sign_vpn_openvpn_server ${SERVER_NAME} ${SERVER_ID} ${SERVER_IP}
+        echo_yellow "完成请求证书签名。"
     
-    ${SHELL_LS} -la certs/| ${SHELL_GREP} ${SERVER_NAME}
+        ${SHELL_LS} -la certs/| ${SHELL_GREP} ${SERVER_NAME}
+    fi
 }
 
 ########## ########## ########## ########## ##########
@@ -51,113 +110,33 @@ function client() {
     CLIENT_NAME=$1
     CLIENT_ID=00
     CLIENT_IP="172.27.XXX.0"
+    FOUND=0
 
-    case ${CLIENT_NAME} in
-        "teach.home")
-            CLIENT_ID=06
-            CLIENT_IP="172.27.XXX.6"
-            ;; 
-        "hp.home")
-            CLIENT_ID=0A
-            CLIENT_IP="172.27.XXX.10"
-            ;; 
-        "test.home")
-            CLIENT_ID=0E
-            CLIENT_IP="172.27.XXX.14"
-            ;; 
-        "mac.home")
-            CLIENT_ID=12
-            CLIENT_IP="172.27.XXX.18"
-            ;; 
-        "stock.home")
-            CLIENT_ID=16
-            CLIENT_IP="172.27.XXX.22"
-            ;; 
-        "asus.home")
-            CLIENT_ID=1A
-            CLIENT_IP="172.27.XXX.26"
-            ;; 
-        "route.home")
-            CLIENT_ID=1E
-            CLIENT_IP="172.27.XXX.30"
-            ;; 
-        "temp.virtual")
-            CLIENT_ID=22
-            CLIENT_IP="172.27.XXX.34"
-            ;; 
-        "internet.virtual")
-            CLIENT_ID=26
-            CLIENT_IP="172.27.XXX.38"
-            ;; 
-        "research.virtual")
-            CLIENT_ID=2A
-            CLIENT_IP="172.27.XXX.42"
-            ;; 
-        "test.virtual")
-            CLIENT_ID=2E
-            CLIENT_IP="172.27.XXX.46"
-            ;; 
-        "vps")
-            CLIENT_ID=32
-            CLIENT_IP="172.27.XXX.50"
-            ;; 
-        "test.work")
-            CLIENT_ID=36
-            CLIENT_IP="172.27.XXX.54"
-            ;; 
-        "dev.work")
-            CLIENT_ID=3A
-            CLIENT_IP="172.27.XXX.58"
-            ;; 
-        "transfer.work")
-            CLIENT_ID=3E
-            CLIENT_IP="172.27.XXX.62"
-            ;; 
-        "beta.work")
-            CLIENT_ID=42
-            CLIENT_IP="172.27.XXX.66"
-            ;; 
-        "ffs.mobile")
-            CLIENT_ID=46
-            CLIENT_IP="172.27.XXX.70"
-            ;; 
-        "test.mobile")
-            CLIENT_ID=4A
-            CLIENT_IP="172.27.XXX.74"
-            ;; 
-        "cz.mobile")
-            CLIENT_ID=4E
-            CLIENT_IP="172.27.XXX.78"
-            ;; 
-        "ipad.mobile")
-            CLIENT_ID=52
-            CLIENT_IP="172.27.XXX.82"
-            ;; 
-        "fsc.mobile")
-            CLIENT_ID=56
-            CLIENT_IP="172.27.XXX.86"
-            ;; 
-        "iphone.mobile")
-            CLIENT_ID=5A
-            CLIENT_IP="172.27.XXX.90"
-            ;; 
-        "csy.mobile")
-            CLIENT_ID=5E
-            CLIENT_IP="172.27.XXX.94"
-            ;; 
-    esac
+    for client in "${clients[@]}"; do
+        IFS=':' read -r name id ip <<< "$client"
+        if [ "$name" = "$CLIENT_NAME" ]; then
+            CLIENT_ID=$id
+            CLIENT_IP=$ip
+            FOUND=1
+            break
+        fi
+    done
 
-    echo_yellow "OpenVPN 客户端 ID：${CLIENT_ID}"
-    echo_yellow "OpenVPN 客户端 IP：${CLIENT_IP}"
+    if [ $FOUND -eq 0 ]; then
+        echo_red "错误：找不到客户端配置 '${CLIENT_NAME}'"
+    else
+        echo_yellow "OpenVPN 客户端 ID：${CLIENT_ID}"
+        echo_yellow "OpenVPN 客户端 IP：${CLIENT_IP}"
 
-    echo_yellow "开始生成请求证书。"
-    ${PATH_CMD} req_vpn_openvpn_client ${CLIENT_NAME} ${CLIENT_ID} ${CLIENT_IP}
-    echo_yellow "完成生成请求证书。"
-    echo_yellow "开始请求证书签名。"
-    ${PATH_CMD} sign_vpn_openvpn_client ${CLIENT_NAME} ${CLIENT_ID} ${CLIENT_IP}
-    echo_yellow "完成请求证书签名。"
-    
-    ${SHELL_LS} -la certs/ | ${SHELL_GREP} ${CLIENT_NAME}
+        echo_yellow "开始生成请求证书。"
+        ${PATH_CMD} req_vpn_openvpn_client ${CLIENT_NAME} ${CLIENT_ID} ${CLIENT_IP}
+        echo_yellow "完成生成请求证书。"
+        echo_yellow "开始请求证书签名。"
+        ${PATH_CMD} sign_vpn_openvpn_client ${CLIENT_NAME} ${CLIENT_ID} ${CLIENT_IP}
+        echo_yellow "完成请求证书签名。"
+        
+        ${SHELL_LS} -la certs/ | ${SHELL_GREP} ${CLIENT_NAME}
+    fi
 }
 
 ########## ########## ########## ########## ##########
@@ -170,61 +149,31 @@ function genkey() {
     KEY_PASS=$2
     ZIP_PASS=$3
 
-    # 服务端证书：xx.server.openvpn.ppno.net。
-    ${PATH_CMD} genkey qd.server.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    ${PATH_CMD} genkey xjp.server.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    ${PATH_CMD} genkey pi.server.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
+    # 服务端证书：使用循环生成。
+    for server in "${servers[@]}"; do
+        IFS=':' read -r name id ip <<< "$server"
+        echo "------------------------------------------"
+        keyname=${name}.server.${DOMAIN_SUFFIX}
+        echo "生成服务端密钥：${keyname}, IP: ${ip}"
+        ${PATH_CMD} genkey ${keyname} ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
+        echo "------------------------------------------"
+    done
 
-    # 172.27.XXX.6
-    ${PATH_CMD} genkey teach.home.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.10
-    ${PATH_CMD} genkey hp.home.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.14
-    ${PATH_CMD} genkey test.home.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.18
-    ${PATH_CMD} genkey mac.home.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.22
-    ${PATH_CMD} genkey stock.home.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.26
-    ${PATH_CMD} genkey asus.home.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.30
-    ${PATH_CMD} genkey route.home.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.34
-    ${PATH_CMD} genkey temp.virtual.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.38
-    ${PATH_CMD} genkey internet.virtual.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.42
-    ${PATH_CMD} genkey research.virtual.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.46
-    ${PATH_CMD} genkey test.virtual.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.50
-    ${PATH_CMD} genkey vps.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.54
-    ${PATH_CMD} genkey test.work.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.58
-    ${PATH_CMD} genkey dev.work.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.62
-    ${PATH_CMD} genkey transfer.work.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.66
-    ${PATH_CMD} genkey beta.work.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.70
-    ${PATH_CMD} genkey ffs.mobile.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.74
-    ${PATH_CMD} genkey test.mobile.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.78
-    ${PATH_CMD} genkey cz.mobile.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.82
-    ${PATH_CMD} genkey ipad.mobile.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.86
-    ${PATH_CMD} genkey fsc.mobile.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.90
-    ${PATH_CMD} genkey iphone.mobile.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
-    # 172.27.XXX.94
-    ${PATH_CMD} genkey csy.mobile.openvpn.ppno.net ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
+    # 客户端证书：使用循环生成。
+    for client in "${clients[@]}"; do
+        IFS=':' read -r name id ip <<< "$client"
+        echo "------------------------------------------"
+        keyname=${name}.${DOMAIN_SUFFIX}
+        echo "生成客户端密钥：${keyname}, IP: ${ip}"
+        ${PATH_CMD} genkey ${keyname} ${KEY_SIZE} ${KEY_PASS} ${ZIP_PASS}
+        echo "------------------------------------------"
+    done
 }
 
 case $1 in
     "server") server $2;;
     "client") client $2;;
     "genkey") genkey $2 $3 $4;;
+    "help"|"-h"|"--help"|"") show_usage "";;
+    *) show_usage "$1"; exit 0;;
 esac

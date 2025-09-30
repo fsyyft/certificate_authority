@@ -7,9 +7,58 @@ PATH_SHELL_FOLDER=$(cd `dirname $0`;pwd)
 PATH_ROOT=${PATH_SHELL_FOLDER}/..
 cd ${PATH_ROOT}
 
-. ${PATH_ROOT}/../../shell/functions
 . ${PATH_ROOT}/../ca_root/bin/functions
 echo_blue "进入工作目录：$(${SHELL_PWD})"
+
+########## ########## ########## ########## ##########
+# 打印脚本用法说明。
+function show_usage() {
+    local invalid_command=$1
+
+    if [ -n "${invalid_command}" ]; then
+        echo_red "未知命令：${invalid_command}"
+        echo
+    fi
+
+    ${SHELL_ECHO} "用法：${0##*/} <命令> [参数]"
+    ${SHELL_ECHO} ""
+    ${SHELL_ECHO} "可用命令："
+    printf "  %-44s %s\n" "req_vpn_openvpn_server <name> <id> <ip>" "生成 OpenVPN 服务端证书请求文件"
+    printf "  %-44s %s\n" "sign_vpn_openvpn_server <name> <id> <ip>" "签名 OpenVPN 服务端证书"
+    printf "  %-44s %s\n" "req_vpn_openvpn_client <name> <id> <ip>" "生成 OpenVPN 客户端证书请求文件"
+    printf "  %-44s %s\n" "sign_vpn_openvpn_client <name> <id> <ip>" "签名 OpenVPN 客户端证书"
+    printf "  %-44s %s\n" "genkey <length> <key-pass> <zip-pass>" "批量生成密钥并压缩到 private 目录"
+}
+
+if [ ! -d private ]; then
+    ${SHELL_MKDIR} -p private
+    if [ -d private ]; then
+        echo_yellow "检测到缺少 private 目录，已自动创建。"
+    else
+        echo_red "创建 private 目录失败，请检查权限。"
+        exit 1
+    fi
+fi
+
+if [ ! -d certs ]; then
+    ${SHELL_MKDIR} -p certs
+    if [ -d certs ]; then
+        echo_yellow "检测到缺少 certs 目录，已自动创建。"
+    else
+        echo_red "创建 certs 目录失败，请检查权限。"
+        exit 1
+    fi
+fi
+
+if [ ! -d newcerts ]; then
+    ${SHELL_MKDIR} -p newcerts
+    if [ -d newcerts ]; then
+        echo_yellow "检测到缺少 newcerts 目录，已自动创建。"
+    else
+        echo_red "创建 newcerts 目录失败，请检查权限。"
+        exit 1
+    fi
+fi
 
 PATH_CONFIG=${PATH_ROOT}/conf/vpn.conf
 
@@ -31,7 +80,7 @@ function req_vpn_openvpn_server () {
     fi    
 
     FILE_CSR=${SERVER_DOMAIN}.csr
-    CONF_EXTENSIONS=v3_vpn_openvpn_server
+    CONF_EXTENSIONS=v3_vpn_openvpn_server_req
     CONF_SERIAL=E3E3E30401010100${SERVER_ID}
 
     export SUBJ_OPENVPN_SERVER_NAME=${SERVER_NAME}
@@ -96,7 +145,7 @@ function req_vpn_openvpn_client () {
 
     FILE_KEY=${CLIENT_DOMAIN}.key
     FILE_CSR=${CLIENT_DOMAIN}.csr
-    CONF_EXTENSIONS=v3_vpn_openvpn_client
+    CONF_EXTENSIONS=v3_vpn_openvpn_client_req
     CONF_SERIAL=E3E3E30401010101${CLIENT_ID}
 
     export SUBJ_OPENVPN_CLIENT_NAME=${CLIENT_NAME}
@@ -151,4 +200,6 @@ case $1 in
     "req_vpn_openvpn_client") req_vpn_openvpn_client $2 $3 $4;;
     "sign_vpn_openvpn_client") sign_vpn_openvpn_client $2 $3 $4;;
     "genkey") genkey  $2 $3 $4 $4;;
+    "help"|"-h"|"--help"|"") show_usage "";;
+    *) show_usage "$1"; exit 0;;
 esac

@@ -1,0 +1,133 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            e3:e3:e3:04:01:01:01:01:2a
+        Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C=CN, ST=Fujian, O=GlobalDevSign, OU=GlobalDevSign OpenVPN Authority, OU=ca.openvpn.vpn.ppno.net, CN=GlobalDevSign OpenVPN Authority/emailAddress=ffs@ppno.net
+        Validity
+            Not Before: Oct 29 15:10:29 2015 GMT
+            Not After : Oct 29 15:10:29 2033 GMT
+        Subject: C=CN, ST=Fujian, O=GlobalDevSign, OU=GlobalDevSign OpenVPN Client Authority, OU=research.virtual.openvpn.ppno.net, CN=research.virtual.openvpn.ppno.net/emailAddress=ffs@ppno.net
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (3072 bit)
+                Modulus:
+                    00:a6:15:f5:80:aa:e6:88:91:85:c8:19:cf:c5:e1:
+                    0e:5e:df:71:32:71:f6:d1:15:25:58:0b:b5:6a:78:
+                    2f:e6:f5:9d:9a:82:df:dd:1b:c6:73:d0:f0:3a:67:
+                    60:a6:f2:e3:2f:68:a3:0f:96:dd:71:2c:56:77:32:
+                    66:fa:16:2a:54:d3:25:4a:6c:3f:d7:76:44:c9:a4:
+                    9c:51:98:59:f8:e3:c0:a4:15:c2:28:44:5c:33:4a:
+                    36:f1:3c:d9:29:0b:c7:1a:34:36:d0:64:db:9d:f1:
+                    4f:77:6d:ca:e5:bc:5b:f9:c4:ed:70:a2:7c:17:b5:
+                    c3:e8:07:44:81:f8:0f:5a:95:dd:79:72:31:43:79:
+                    e9:2f:c0:94:95:c8:bb:b5:5f:4c:fa:10:2e:fa:24:
+                    8d:9a:b4:2e:56:79:60:ee:3f:94:f1:cd:cc:18:cc:
+                    a5:0f:58:de:6e:c2:e4:70:eb:9b:aa:02:22:bc:ac:
+                    fe:1d:35:ce:cd:b1:8b:15:2a:30:8c:98:dc:2f:d7:
+                    82:d8:b6:7a:58:bd:27:e6:ac:af:2a:c5:73:57:f6:
+                    34:83:41:a9:e9:3f:c3:06:8d:2a:77:ca:5f:44:7c:
+                    e0:e8:51:a9:f7:b2:74:a0:41:81:8b:46:0c:f7:d0:
+                    a9:15:ef:18:da:c4:26:42:18:55:4c:0e:da:3d:f6:
+                    47:c6:2b:1d:3c:5d:c7:2f:a1:e5:37:de:75:e9:14:
+                    2e:e2:f8:97:83:15:d2:78:36:6c:06:e0:26:b9:0a:
+                    f5:3e:0f:95:82:51:0d:d4:3d:66:5c:2f:ed:c0:9f:
+                    85:df:ef:3f:07:88:fc:34:55:ad:11:50:12:7a:32:
+                    9f:15:20:09:ff:8f:cb:c0:2a:d7:bf:d1:14:29:70:
+                    cb:20:f4:d4:d6:7b:8b:cc:56:78:eb:1a:ab:24:96:
+                    32:6a:b1:68:94:be:ae:09:8b:cd:e0:a3:19:58:8c:
+                    16:9f:de:bd:e7:fb:cf:0c:27:c1:68:d4:63:eb:34:
+                    79:40:77:f1:f2:8b:73:87:89:41
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            Netscape Comment:
+                GlobalDevSign OpenVPN Client Authority
+            Netscape Cert Type:
+                SSL Client
+            X509v3 Basic Constraints:
+                CA:FALSE
+            X509v3 Key Usage: critical
+                Digital Signature, Key Encipherment
+            X509v3 Extended Key Usage: critical
+                TLS Web Client Authentication
+            X509v3 Subject Key Identifier:
+                09:14:9B:6D:09:C2:83:D3:66:7A:F1:3B:9D:1A:A7:63:DE:1D:F3:8C
+            X509v3 Subject Alternative Name:
+                DNS:research.virtual.openvpn.ppno.net, URI:https://ca.ppno.net/readme/, DirName:/title=172.27.XXX.42
+            X509v3 CRL Distribution Points:
+                Full Name:
+                  URI:http://ca.ppno.net/crl/openvpn.vpn.crl
+            Authority Information Access:
+                CA Issuers - URI:http://ca.ppno.net/crt/ca.openvpn.vpn.crt
+            X509v3 Authority Key Identifier:
+                keyid:56:07:BB:7E:67:5C:E9:A1:D2:4F:C9:CD:0C:2C:70:51:36:D1:FE:B2
+                DirName:/C=CN/ST=Fujian/O=GlobalDevSign/OU=GlobalDevSign VPN Authority/OU=ca.vpn.ppno.net/CN=GlobalDevSign VPN Authority/emailAddress=ffs@ppno.net
+                serial:E3:E3:E3:03:01:01:02
+    Signature Algorithm: sha256WithRSAEncryption
+    Signature Value:
+        44:91:46:f8:ac:28:56:49:9a:5d:4c:f6:ae:ef:1b:d3:ef:21:
+        1e:23:74:9f:c3:1c:bd:f3:ae:1c:69:56:9d:53:15:67:b5:93:
+        24:57:44:26:4c:fa:20:63:7a:19:08:86:59:3e:16:e1:bc:4a:
+        60:48:c5:f5:48:d2:84:15:6d:f9:4f:52:89:fd:de:27:46:b3:
+        f1:92:58:6b:f2:0a:8e:41:9d:b4:80:6b:43:e6:99:77:32:58:
+        34:36:bd:48:1c:55:d6:b4:c4:f6:63:ce:5e:93:c3:b5:65:fa:
+        af:fb:0a:a7:26:c2:c9:f4:76:fc:90:36:75:9b:9a:d1:dd:ac:
+        21:7d:25:28:53:db:08:64:e3:3b:e3:d0:4a:be:0b:b8:50:36:
+        fb:34:86:35:9f:a7:d6:a3:d0:2f:bd:b5:65:4a:da:cd:5d:77:
+        72:b6:6a:80:ac:48:e0:ed:bf:a7:02:0a:70:a7:18:ab:54:fb:
+        4e:48:4a:d6:23:a1:7c:b2:46:fd:41:9d:24:7a:de:dd:8d:03:
+        f4:6c:8f:0d:7e:a2:19:45:72:a3:8a:e8:10:87:57:0f:3a:3d:
+        f3:75:aa:59:16:f5:14:4f:73:69:0f:7a:20:80:f5:af:de:1f:
+        91:ca:66:19:24:02:8c:74:dd:b4:3a:e4:8b:e5:62:93:84:b1:
+        ab:6a:cb:53:c6:94:ba:da:1c:fd:e6:10:b3:be:f6:61:6d:96:
+        f1:b7:9a:da:a7:17:f8:d3:36:76:da:ae:c3:08:eb:db:55:0c:
+        d9:cc:35:b0:99:88:b8:57:ed:0f:8a:d6:83:03:fa:c2:dc:dd:
+        67:b7:c1:2e:4c:5c:b8:02:87:2c:67:80:36:9c:ea:dc:f6:b3:
+        6b:02:ca:84:22:f3:af:5b:48:c0:7d:3d:df:26:ea:27:ab:56:
+        f2:21:ab:9d:f0:f2:bf:c3:33:70:ae:13:73:11:2f:04:52:06:
+        15:01:f9:ec:45:b7:e1:5f:78:4c:28:64:47:9f:07:fa:ae:b3:
+        0a:a8:8a:50:6b:56
+-----BEGIN CERTIFICATE-----
+MIIHpDCCBgygAwIBAgIKAOPj4wQBAQEBKjANBgkqhkiG9w0BAQsFADCByTELMAkG
+A1UEBhMCQ04xDzANBgNVBAgMBkZ1amlhbjEWMBQGA1UECgwNR2xvYmFsRGV2U2ln
+bjEoMCYGA1UECwwfR2xvYmFsRGV2U2lnbiBPcGVuVlBOIEF1dGhvcml0eTEgMB4G
+A1UECwwXY2Eub3BlbnZwbi52cG4ucHBuby5uZXQxKDAmBgNVBAMMH0dsb2JhbERl
+dlNpZ24gT3BlblZQTiBBdXRob3JpdHkxGzAZBgkqhkiG9w0BCQEWDGZmc0BwcG5v
+Lm5ldDAeFw0xNTEwMjkxNTEwMjlaFw0zMzEwMjkxNTEwMjlaMIHcMQswCQYDVQQG
+EwJDTjEPMA0GA1UECAwGRnVqaWFuMRYwFAYDVQQKDA1HbG9iYWxEZXZTaWduMS8w
+LQYDVQQLDCZHbG9iYWxEZXZTaWduIE9wZW5WUE4gQ2xpZW50IEF1dGhvcml0eTEq
+MCgGA1UECwwhcmVzZWFyY2gudmlydHVhbC5vcGVudnBuLnBwbm8ubmV0MSowKAYD
+VQQDDCFyZXNlYXJjaC52aXJ0dWFsLm9wZW52cG4ucHBuby5uZXQxGzAZBgkqhkiG
+9w0BCQEWDGZmc0BwcG5vLm5ldDCCAaIwDQYJKoZIhvcNAQEBBQADggGPADCCAYoC
+ggGBAKYV9YCq5oiRhcgZz8XhDl7fcTJx9tEVJVgLtWp4L+b1nZqC390bxnPQ8Dpn
+YKby4y9oow+W3XEsVncyZvoWKlTTJUpsP9d2RMmknFGYWfjjwKQVwihEXDNKNvE8
+2SkLxxo0NtBk253xT3dtyuW8W/nE7XCifBe1w+gHRIH4D1qV3XlyMUN56S/AlJXI
+u7VfTPoQLvokjZq0LlZ5YO4/lPHNzBjMpQ9Y3m7C5HDrm6oCIrys/h01zs2xixUq
+MIyY3C/Xgti2eli9J+asryrFc1f2NINBqek/wwaNKnfKX0R84OhRqfeydKBBgYtG
+DPfQqRXvGNrEJkIYVUwO2j32R8YrHTxdxy+h5TfedekULuL4l4MV0ng2bAbgJrkK
+9T4PlYJRDdQ9Zlwv7cCfhd/vPweI/DRVrRFQEnoynxUgCf+Py8Aq17/RFClwyyD0
+1NZ7i8xWeOsaqySWMmqxaJS+rgmLzeCjGViMFp/evef7zwwnwWjUY+s0eUB38fKL
+c4eJQQIDAQABo4ICdzCCAnMwNQYJYIZIAYb4QgENBCgWJkdsb2JhbERldlNpZ24g
+T3BlblZQTiBDbGllbnQgQXV0aG9yaXR5MBEGCWCGSAGG+EIBAQQEAwIHgDAJBgNV
+HRMEAjAAMA4GA1UdDwEB/wQEAwIFoDAWBgNVHSUBAf8EDDAKBggrBgEFBQcDAjAd
+BgNVHQ4EFgQUCRSbbQnCg9NmevE7nRqnY94d84wwZQYDVR0RBF4wXIIhcmVzZWFy
+Y2gudmlydHVhbC5vcGVudnBuLnBwbm8ubmV0hhtodHRwczovL2NhLnBwbm8ubmV0
+L3JlYWRtZS+kGjAYMRYwFAYDVQQMDA0xNzIuMjcuWFhYLjQyMDcGA1UdHwQwMC4w
+LKAqoCiGJmh0dHA6Ly9jYS5wcG5vLm5ldC9jcmwvb3BlbnZwbi52cG4uY3JsMEUG
+CCsGAQUFBwEBBDkwNzA1BggrBgEFBQcwAoYpaHR0cDovL2NhLnBwbm8ubmV0L2Ny
+dC9jYS5vcGVudnBuLnZwbi5jcnQwge0GA1UdIwSB5TCB4oAUVge7fmdc6aHST8nN
+DCxwUTbR/rKhgb+kgbwwgbkxCzAJBgNVBAYTAkNOMQ8wDQYDVQQIDAZGdWppYW4x
+FjAUBgNVBAoMDUdsb2JhbERldlNpZ24xJDAiBgNVBAsMG0dsb2JhbERldlNpZ24g
+VlBOIEF1dGhvcml0eTEYMBYGA1UECwwPY2EudnBuLnBwbm8ubmV0MSQwIgYDVQQD
+DBtHbG9iYWxEZXZTaWduIFZQTiBBdXRob3JpdHkxGzAZBgkqhkiG9w0BCQEWDGZm
+c0BwcG5vLm5ldIIIAOPj4wMBAQIwDQYJKoZIhvcNAQELBQADggGBAESRRvisKFZJ
+ml1M9q7vG9PvIR4jdJ/DHL3zrhxpVp1TFWe1kyRXRCZM+iBjehkIhlk+FuG8SmBI
+xfVI0oQVbflPUon93idGs/GSWGvyCo5BnbSAa0PmmXcyWDQ2vUgcVda0xPZjzl6T
+w7Vl+q/7Cqcmwsn0dvyQNnWbmtHdrCF9JShT2whk4zvj0Eq+C7hQNvs0hjWfp9aj
+0C+9tWVK2s1dd3K2aoCsSODtv6cCCnCnGKtU+05IStYjoXyyRv1BnSR63t2NA/Rs
+jw1+ohlFcqOK6BCHVw86PfN1qlkW9RRPc2kPeiCA9a/eH5HKZhkkAox03bQ65Ivl
+YpOEsatqy1PGlLraHP3mELO+9mFtlvG3mtqnF/jTNnbarsMI69tVDNnMNbCZiLhX
+7Q+K1oMD+sLc3We3wS5MXLgChyxngDac6tz2s2sCyoQi869bSMB9Pd8m6ierVvIh
+q53w8r/DM3CuE3MRLwRSBhUB+exFt+FfeEwoZEefB/quswqoilBrVg==
+-----END CERTIFICATE-----
