@@ -5,6 +5,7 @@
 PATH_SHELL_FOLDER=$(cd `dirname $0`;pwd)
 
 PATH_ROOT=${PATH_SHELL_FOLDER}/..
+export PATH_CA_ROOT=${PATH_ROOT}
 cd ${PATH_ROOT}
 
 . ${PATH_ROOT}/bin/functions
@@ -26,6 +27,16 @@ if [ ! -d certs ]; then
         echo_yellow "检测到缺少 certs 目录，已自动创建。"
     else
         echo_red "创建 certs 目录失败，请检查权限。"
+        exit 1
+    fi
+fi
+
+if [ ! -d newcerts ]; then
+    ${SHELL_MKDIR} -p newcerts
+    if [ -d newcerts ]; then
+        echo_yellow "检测到缺少 newcerts 目录，已自动创建。"
+    else
+        echo_red "创建 newcerts 目录失败，请检查权限。"
         exit 1
     fi
 fi
