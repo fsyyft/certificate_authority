@@ -13,6 +13,24 @@ cd ${PATH_ROOT}
 echo_blue 进入工作目录：$(${SHELL_PWD})
 
 ########## ########## ########## ########## ##########
+# 打印脚本用法说明。
+function show_usage() {
+    local invalid_command=$1
+
+    if [ -n "${invalid_command}" ]; then
+        echo_red "未知命令：${invalid_command}"
+        echo
+    fi
+
+    ${SHELL_ECHO} "用法：${0##*/} <命令> [参数]"
+    ${SHELL_ECHO} ""
+    ${SHELL_ECHO} "可用命令："
+    printf "  %-40s %s\n" "server <name>" "生成并签名 OpenVPN 服务端证书"
+    printf "  %-40s %s\n" "client <name>" "生成并签名 OpenVPN 客户端证书"
+    printf "  %-40s %s\n" "genkey <length> <key-pass> <zip-pass>" "批量生成密钥并压缩到 private 目录"
+}
+
+########## ########## ########## ########## ##########
 # 生成并签名 OpenVPN 服务端证书。
 # 参数1：证书名称；通过证书名称，转换出证书编号和使用证书的地址。
 function server() {
@@ -233,4 +251,6 @@ case $1 in
     "server") server $2;;
     "client") client $2;;
     "genkey") genkey $2 $3 $4;;
+    "help"|"-h"|"--help"|"") show_usage "";;
+    *) show_usage "$1"; exit 0;;
 esac
