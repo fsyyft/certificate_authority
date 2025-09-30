@@ -13,7 +13,7 @@ echo_blue "进入工作目录：$(${SHELL_PWD})"
 
 # 检查并创建必要的目录。
 function check_and_create_dirs() {
-    local dirs=("private" "certs" "newcerts")
+    local dirs=("private" "certs" "newcerts" "pfx")
     for dir in "${dirs[@]}"; do
         if [ ! -d "$dir" ]; then
             ${SHELL_MKDIR} -p "$dir"
@@ -148,6 +148,61 @@ function sign_mstsc_ppno_net () {
 }
 
 ########## ########## ########## ########## ##########
+# 导出 mstsc.ppno.net RDP 服务端证书为 PFX 格式。
+function export_mstsc_ppno_net () {
+    rm_file ${PATH_ROOT}/private/${CONF_KEY_MSTSC_PPNO_NET}
+
+    unzip_key ${CONF_KEY_MSTSC_PPNO_NET}
+
+    if [ ! -f ${PATH_ROOT}/private/${CONF_KEY_MSTSC_PPNO_NET} ]; then
+        echo_yellow "解压密钥失败。"
+        exit
+    fi
+
+    echo_blue "开始导出 PFX 证书文件。"
+
+    # 创建包含完整证书链的临时文件
+    CERT_CHAIN_FILE=${PATH_ROOT}/certs/${CONF_DOM_MSTSC_PPNO_NET}_chain.crt
+    ${SHELL_CAT} ${PATH_ROOT}/certs/${CONF_CRT_MSTSC_PPNO_NET} > ${CERT_CHAIN_FILE}
+    ${SHELL_ECHO} "" >> ${CERT_CHAIN_FILE}
+    ${SHELL_CAT} ${PATH_ROOT}/certs/${CONF_CRT_CA_INTERNET_SERVICE} >> ${CERT_CHAIN_FILE}
+    ${SHELL_ECHO} "" >> ${CERT_CHAIN_FILE}
+    ${SHELL_CAT} ${PATH_ROOT}/../ca_root/certs/ca.internet.ppno.net.crt >> ${CERT_CHAIN_FILE}
+    ${SHELL_ECHO} "" >> ${CERT_CHAIN_FILE}
+    ${SHELL_CAT} ${PATH_ROOT}/../ca_root/certs/ca.ppno.net.crt >> ${CERT_CHAIN_FILE}
+
+    ${SHELL_OPENSSL} pkcs12 -export                                \
+                    -out ${PATH_ROOT}/pfx/${CONF_DOM_MSTSC_PPNO_NET}.pfx \
+                    -inkey ${PATH_ROOT}/private/${CONF_KEY_MSTSC_PPNO_NET} \
+                    -in ${PATH_ROOT}/certs/${CONF_CRT_MSTSC_PPNO_NET} \
+                    -certfile ${CERT_CHAIN_FILE}
+
+    # 清理临时文件
+    ${SHELL_RM} -f ${CERT_CHAIN_FILE}
+
+    ${SHELL_RM} -rf ${PATH_ROOT}/private/${CONF_KEY_MSTSC_PPNO_NET}
+
+    if [ -f ${PATH_ROOT}/pfx/${CONF_DOM_MSTSC_PPNO_NET}.pfx ]; then
+        echo_blue "PFX 证书文件导出完成：${PATH_ROOT}/pfx/${CONF_DOM_MSTSC_PPNO_NET}.pfx"
+
+        # 获取证书 SHA1 指纹并生成注册表文件
+        CERT_FINGERPRINT=$(${SHELL_OPENSSL} x509 -in ${PATH_ROOT}/certs/${CONF_CRT_MSTSC_PPNO_NET} -fingerprint -sha1 -noout | ${SHELL_SED} 's/sha1 Fingerprint=//' | ${SHELL_SED} 's/:/,/g')
+
+        # 生成 .reg 文件
+        REG_FILE=${PATH_ROOT}/pfx/${CONF_DOM_MSTSC_PPNO_NET}.reg
+        ${SHELL_ECHO} "Windows Registry Editor Version 5.00" > ${REG_FILE}
+        ${SHELL_ECHO} "" >> ${REG_FILE}
+        ${SHELL_ECHO} "[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server\\WinStations\\RDP-Tcp]" >> ${REG_FILE}
+        ${SHELL_ECHO} "\"SSLCertificateSHA1Hash\"=hex:${CERT_FINGERPRINT}" >> ${REG_FILE}
+
+        echo_blue "注册表文件生成完成：${REG_FILE}"
+        echo_yellow "请使用此文件在 Windows 中导入证书。"
+    else
+        echo_red "PFX 证书文件导出失败。"
+    fi
+}
+
+########## ########## ########## ########## ##########
 # 生成 test 用户证书请求文件。
 function req_personal_test () {
     CONF_EXTENSIONS=v3_personal_test_req
@@ -175,6 +230,7 @@ function sign_personal_test () {
 case $1 in
     "req_mstsc_ppno_net") req_mstsc_ppno_net;;
     "sign_mstsc_ppno_net") sign_mstsc_ppno_net;;
+    "export_mstsc_ppno_net") export_mstsc_ppno_net;;
     "req_test_ppno_net") req_test_ppno_net;;
     "sign_test_ppno_net") sign_test_ppno_net;;
     "req_personal_test") req_personal_test;;
