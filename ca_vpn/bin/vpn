@@ -125,7 +125,7 @@ function req_vpn_openvpn_client () {
 
     FILE_KEY=${CLIENT_DOMAIN}.key
     FILE_CSR=${CLIENT_DOMAIN}.csr
-    CONF_EXTENSIONS=v3_vpn_openvpn_client
+    CONF_EXTENSIONS=v3_vpn_openvpn_client_req
     CONF_SERIAL=E3E3E30401010101${CLIENT_ID}
 
     export SUBJ_OPENVPN_CLIENT_NAME=${CLIENT_NAME}
