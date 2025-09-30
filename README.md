@@ -4,15 +4,15 @@
 
 ### 示例规划
 
-类型    | 编号          |  一级 | 二级          | 三级                  | 四级
----|---|---|---|---|---
-机构    | 0100E3        | ca    |               |
-机构    | 020101        |       | ca.vpn        |
-机构    | 03010101      |       |               | ca.openvpn.vpn        |
-机构    | 020201        |       | ca.internet   |
-机构    | 03020101      |       |               | ca.service.internet   |
-机构    | 03020102      |       |               | ca.personal.internet
-机构    | 020401        |       | ca.test
+| 类型 | 编号   | 开始时间           | 结束时间           | 一级 | 二级        | 三级                | 四级 |
+| ---- | ------ | ------------------ | ------------------ | ---- | ----------- | ------------------- | ---- |
+| 机构 | 0100E3 | 2015-10-29 15:10:29 | 3315-10-29 15:10:29 | ca   |             |                     |      |
+| 机构 | 020101 | -                  | -                  |      | ca.vpn      |                     |      |
+| 机构 | 03010101 | -                | -                  |      |             | ca.openvpn.vpn      |      |
+| 机构 | 020201 | -                  | -                  |      | ca.internet |                     |      |
+| 机构 | 03020101 | -                | -                  |      |             | ca.service.internet |      |
+| 机构 | 03020102 | -                | -                  |      |             | ca.personal.internet |      |
+| 机构 | 020401 | -                  | -                  |      | ca.test     |                     |      |
 
 ### 示例实验
 
@@ -24,11 +24,7 @@
 
 ```
 [fsyyft@kvm-centos7-openssl pki]# cd /data/pki/
-[fsyyft@kvm-centos7-openssl pki]# export ENV_KEY_NAME="ca.ppno.net"
-[fsyyft@kvm-centos7-openssl pki]# export ENV_KEY_SIZE="512"
-[fsyyft@kvm-centos7-openssl pki]# export ENV_KEY_PASS="123456"
-[fsyyft@kvm-centos7-openssl pki]# export ENV_ZIP_PASS="123456"
-[fsyyft@kvm-centos7-openssl pki]# ca_root/bin/ca genkey "$ENV_KEY_NAME" "$ENV_KEY_SIZE" "$ENV_KEY_PASS" "$ENV_ZIP_PASS"
+[fsyyft@kvm-centos7-openssl pki]# ca_root/bin/ca genkey ca.ppno.net 1024 123456 123456
 [fsyyft@kvm-centos7-openssl pki]# ca_root/bin/ca req_ca
 [fsyyft@kvm-centos7-openssl pki]# ca_root/bin/ca selfsign_ca
 ```
@@ -97,4 +93,24 @@
 [fsyyft@kvm-centos7-openssl pki]# ca_internet/bin/service genkey test.personal 4096 123456 123456
 [fsyyft@kvm-centos7-openssl pki]# ca_internet/bin/service req_personal_test
 [fsyyft@kvm-centos7-openssl pki]# ca_internet/bin/service sign_personal_test
+```
+
+## 常用命令
+
+### 查看私钥信息
+
+```
+openssl rsa -noout -text -in ca.ppno.net.key
+```
+
+### 查看请求文件信息
+
+```
+openssl req -noout -text -in ca.ppno.net.csr
+```
+
+### 查看证书信息
+
+```
+openssl x509 -noout -text -in ca.ppno.net.crt
 ```
