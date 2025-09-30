@@ -38,22 +38,21 @@ function server() {
     SERVER_ID=00
     SERVER_IP="172.27.XXX.1"
 
-    case ${SERVER_NAME} in
-        "qd")
-            SERVER_ID=35
-            SERVER_IP="172.27.53.1"
-            ;;
-        "pi")
-            SERVER_ID=0A
-            SERVER_IP="172.27.16.1"
-            ;;
-        # Work Docker。
-        "wd")
-            SERVER_ID=D5
-            SERVER_IP="172.27.213.1"
-            ;;
-    esac
+    # 服务器配置列表：格式为 name:id:ip
+    declare -a servers=(
+        "qd:35:172.27.53.1"
+        "pi:0A:172.27.16.1"
+        "wd:D5:172.27.213.1"
+    )
 
+    for server in "${servers[@]}"; do
+        IFS=':' read -r name id ip <<< "$server"
+        if [ "$name" = "$SERVER_NAME" ]; then
+            SERVER_ID=$id
+            SERVER_IP=$ip
+            break
+        fi
+    done
 
     echo_yellow "OpenVPN 服务端 ID：${SERVER_ID}"
     echo_yellow "OpenVPN 服务端 IP：${SERVER_IP}"
@@ -76,100 +75,41 @@ function client() {
     CLIENT_ID=00
     CLIENT_IP="172.27.XXX.0"
 
-    case ${CLIENT_NAME} in
-        "teach.home")
-            CLIENT_ID=06
-            CLIENT_IP="172.27.XXX.6"
-            ;; 
-        "hp.home")
-            CLIENT_ID=0A
-            CLIENT_IP="172.27.XXX.10"
-            ;; 
-        "test.home")
-            CLIENT_ID=0E
-            CLIENT_IP="172.27.XXX.14"
-            ;; 
-        "mac.home")
-            CLIENT_ID=12
-            CLIENT_IP="172.27.XXX.18"
-            ;; 
-        "stock.home")
-            CLIENT_ID=16
-            CLIENT_IP="172.27.XXX.22"
-            ;; 
-        "asus.home")
-            CLIENT_ID=1A
-            CLIENT_IP="172.27.XXX.26"
-            ;; 
-        "route.home")
-            CLIENT_ID=1E
-            CLIENT_IP="172.27.XXX.30"
-            ;; 
-        "temp.virtual")
-            CLIENT_ID=22
-            CLIENT_IP="172.27.XXX.34"
-            ;; 
-        "internet.virtual")
-            CLIENT_ID=26
-            CLIENT_IP="172.27.XXX.38"
-            ;; 
-        "research.virtual")
-            CLIENT_ID=2A
-            CLIENT_IP="172.27.XXX.42"
-            ;; 
-        "test.virtual")
-            CLIENT_ID=2E
-            CLIENT_IP="172.27.XXX.46"
-            ;; 
-        "vps")
-            CLIENT_ID=32
-            CLIENT_IP="172.27.XXX.50"
-            ;; 
-        "test.work")
-            CLIENT_ID=36
-            CLIENT_IP="172.27.XXX.54"
-            ;; 
-        "dev.work")
-            CLIENT_ID=3A
-            CLIENT_IP="172.27.XXX.58"
-            ;; 
-        "transfer.work")
-            CLIENT_ID=3E
-            CLIENT_IP="172.27.XXX.62"
-            ;; 
-        "beta.work")
-            CLIENT_ID=42
-            CLIENT_IP="172.27.XXX.66"
-            ;; 
-        "ffs.mobile")
-            CLIENT_ID=46
-            CLIENT_IP="172.27.XXX.70"
-            ;; 
-        "test.mobile")
-            CLIENT_ID=4A
-            CLIENT_IP="172.27.XXX.74"
-            ;; 
-        "cz.mobile")
-            CLIENT_ID=4E
-            CLIENT_IP="172.27.XXX.78"
-            ;; 
-        "ipad.mobile")
-            CLIENT_ID=52
-            CLIENT_IP="172.27.XXX.82"
-            ;; 
-        "fsc.mobile")
-            CLIENT_ID=56
-            CLIENT_IP="172.27.XXX.86"
-            ;; 
-        "iphone.mobile")
-            CLIENT_ID=5A
-            CLIENT_IP="172.27.XXX.90"
-            ;; 
-        "csy.mobile")
-            CLIENT_ID=5E
-            CLIENT_IP="172.27.XXX.94"
-            ;; 
-    esac
+    # 客户端配置列表：格式为 name:id:ip
+    declare -a clients=(
+        "teach.home:06:172.27.XXX.6"
+        "hp.home:0A:172.27.XXX.10"
+        "test.home:0E:172.27.XXX.14"
+        "mac.home:12:172.27.XXX.18"
+        "stock.home:16:172.27.XXX.22"
+        "asus.home:1A:172.27.XXX.26"
+        "route.home:1E:172.27.XXX.30"
+        "temp.virtual:22:172.27.XXX.34"
+        "internet.virtual:26:172.27.XXX.38"
+        "research.virtual:2A:172.27.XXX.42"
+        "test.virtual:2E:172.27.XXX.46"
+        "vps:32:172.27.XXX.50"
+        "test.work:36:172.27.XXX.54"
+        "dev.work:3A:172.27.XXX.58"
+        "transfer.work:3E:172.27.XXX.62"
+        "beta.work:42:172.27.XXX.66"
+        "ffs.mobile:46:172.27.XXX.70"
+        "test.mobile:4A:172.27.XXX.74"
+        "cz.mobile:4E:172.27.XXX.78"
+        "ipad.mobile:52:172.27.XXX.82"
+        "fsc.mobile:56:172.27.XXX.86"
+        "iphone.mobile:5A:172.27.XXX.90"
+        "csy.mobile:5E:172.27.XXX.94"
+    )
+
+    for client in "${clients[@]}"; do
+        IFS=':' read -r name id ip <<< "$client"
+        if [ "$name" = "$CLIENT_NAME" ]; then
+            CLIENT_ID=$id
+            CLIENT_IP=$ip
+            break
+        fi
+    done
 
     echo_yellow "OpenVPN 客户端 ID：${CLIENT_ID}"
     echo_yellow "OpenVPN 客户端 IP：${CLIENT_IP}"
