@@ -194,10 +194,11 @@ function sign_ca_vpn () {
 ########## ########## ########## ########## ##########
 # 生成 OpenVPN 颁发机构证书请求文件。
 function req_ca_vpn_openvpn () {
+    CONF_EXTENSIONS=v3_ca_vpn_openvpn_req
     req_common  ${CONF_KEY_CA_VPN_OPENVPN}                      \
                 ${CONF_CSR_CA_VPN_OPENVPN}                      \
                 ${CONF_SER_CA_VPN_OPENVPN}                      \
-                "v3_ca_vpn_openvpn"                             \
+                ${CONF_EXTENSIONS}                              \
                 "GlobalDevSign OpenVPN Authority"               \
                 "ca.openvpn.vpn.${CONF_DOMAIN}"                 \
                 "GlobalDevSign OpenVPN Authority"
@@ -211,7 +212,9 @@ function sign_ca_vpn_openvpn () {
                     ${CONF_CSR_CA_VPN_OPENVPN}                  \
                     ${CONF_CRT_CA_VPN_OPENVPN}                  \
                     ${CONF_SER_CA_VPN_OPENVPN}                  \
-                    "v3_ca_vpn_openvpn"
+                    "v3_ca_vpn_openvpn"                         \
+                    ${CONF_STARTDATE}                           \
+                    ${CONF_ENDDATE}
 }
 
 

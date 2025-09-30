@@ -309,6 +309,10 @@ function sign_common () {
     # 删除数据库中的当前使用的序列号。
     del_exists_serial ${CONF_SER}
 
+    echo_blue "签名有效期：${D_START} -> ${D_END}"
+
+    rm_file certs/${FILE_CRT}
+
     ${SHELL_OPENSSL} ca                                         \
                     -config ${PATH_CONFIG}                      \
                     -extensions ${CONF_EXT}                     \
