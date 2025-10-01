@@ -11,6 +11,8 @@ title: 证书管理系统文档主页
 
 - [Windows 10 远程桌面证书配置指南](windows-rdp-certificate-setup.md)
   - 配置 RDP 使用受信任证书：PFX 导入（含完整链）、注册表 `SSLCertificateSHA1Hash`、私钥权限（Network Service）、常见错误 0x8009030D 处理。
+- [OpenVPN 密码认证配置与原理详解](openvpn-auth-password.md)
+  - 详述"证书+用户名密码"双因子认证实现：auth-user-pass-verify 外部脚本认证、systemd 进程数限制调整、权限配置与常见问题排查。
 - [Diffie-Hellman 密钥交换在 OpenVPN 中的应用](dh-key-exchange.md)
   - 介绍 DH 的数学原理、在 TLS/OpenVPN 中的角色、生成与安全实践建议。
 - [Git 分支合并指南：从单分支到 Git Flow](git-merge-guide.md)
