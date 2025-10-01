@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+# ---------------------------------------------------------------------------
+# OpenVPN auth-user-pass-verify Script (via-file mode)
+# 作用：基于 (username + password + 固定盐) 的 SHA256 哈希在本地用户库中校验。
+# 运行时机：OpenVPN 在 TLS 完成后调用本脚本；成功返回 0，失败返回非 0。
+# 返回码：
+#   0  -> 认证成功
+#   1  -> 常规失败（任何未单独区分的错误）
+#   2  -> 临时文件不可读 / 参数错误
+#   3  -> 字段为空
+#   4  -> 依赖命令缺失
+#   5  -> 用户不存在
+#   6  -> 密码不匹配
+# 安全注意：当前使用固定 SALT 与 SHA256，仅适合内网低风险场景；生产环境应考虑：
+#   * 每用户随机盐（存数据库里）
+#   * 更强哈希（argon2id / scrypt / bcrypt）
+#   * 失败次数限制与节流
+# ---------------------------------------------------------------------------
+set -euo pipefail
+
+# ------------------------- 可配置常量 --------------------------------------
+LOG_DIR="/data/var/log/openvpn/pi.server"
+CRED_FILE="/data/etc/openvpn/pi.server/pi.server.cred"	# 用户:hash 列表。
+LOG_FILE="$LOG_DIR/pi.server.auth.log" # 认证审计日志。
+SALT="pi.server"                       # 固定盐（与生成 hash 时一致）。
+UMASK_VALUE=027                        # 确保日志与临时创建文件权限收敛。
+LOCK_FD=9                              # flock 使用的文件描述符。
+
+# ------------------------- 初始化与检查 ------------------------------------
+umask "$UMASK_VALUE"
+mkdir -p "$LOG_DIR"
+if [[ ! -f "$LOG_FILE" ]]; then
+	# 首次创建：所有者可能是 nobody（降权后），满足写入即可。
+	touch "$LOG_FILE" || exit 1
+fi
+# 权限：所有者可写，组可读；必要时按需调整 660 -> 640。
+chmod 640 "$LOG_FILE" 2>/dev/null || true
+chgrp nogroup "$LOG_FILE" 2>/dev/null || true
+
+# 依赖检测
+for _dep in sha256sum awk grep; do
+	command -v "$_dep" >/dev/null 2>&1 || { echo "依赖缺失: $_dep" >&2; exit 4; }
+done
+
+# ------------------------- 日志与工具函数 ---------------------------------
+log() {
+	# 使用 flock 避免并发写交叉；失败不阻断主流程。
+	local now
+	now="$(date '+%F %T')"
+	{
+		flock -w 1 $LOCK_FD || true
+		printf '[%s] pid=%d %s\n' "$now" "$$" "$*" >&$LOCK_FD
+	} 9>>"$LOG_FILE"
+}
+
+die() { # die code message
+	local rc="$1"; shift || true
+	log "auth_end result=FAIL code=$rc $* user='${AUTH_USER:-}'"
+	exit "$rc"
+}
+
+success() {
+	log "auth_end result=OK user='${AUTH_USER}'"
+	exit 0
+}
+
+hash_password() { # stdin -> sha256 hex
+	sha256sum | awk '{print $1}'
+}
+
+# ------------------------- 主逻辑 ------------------------------------------
+main() {
+	if [[ $# -lt 1 || ! -r "$1" ]]; then
+		die 2 "reason=no_temp_file"
+	fi
+	local tmp="$1"
+
+	# 读取用户名与密码（忽略 Windows CR）。
+	# 使用 read 可避免 sed 两次 IO；兼容空白字符（末尾 CR trimmed）。
+	local u p
+	IFS= read -r u < "$tmp" || true
+	IFS= read -r p < <(sed -n '2p' "$tmp" 2>/dev/null || true)
+	u="${u%%$'\r'}"; p="${p%%$'\r'}"
+
+	AUTH_USER="$u"
+	if [[ -z "$u" || -z "$p" ]]; then
+		die 3 "reason=empty_field"
+	fi
+
+	if [[ ! -r "$CRED_FILE" ]]; then
+		die 2 "reason=cred_file_unreadable"
+	fi
+
+	# 精确匹配行开头（避免 user 前缀碰撞）。
+	local line
+	line=$(grep -E "^${u}:" "$CRED_FILE" || true)
+	if [[ -z "$line" ]]; then
+		die 5 "reason=user_not_found"
+	fi
+
+	local stored_hash calc_hash
+	stored_hash=${line#*:}
+	# 计算哈希。
+	calc_hash=$(printf '%s' "${p}${SALT}" | hash_password)
+	if [[ "$calc_hash" != "$stored_hash" ]]; then
+		die 6 "reason=password_mismatch"
+	fi
+
+	success
+}
+
+trap 'die 1 "reason=trap_error status=$?"' ERR
+log "auth_start user_file='${1:-}'"
+main "$@"
