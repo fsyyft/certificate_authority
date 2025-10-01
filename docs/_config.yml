@@ -1,0 +1,25 @@
+title: 证书管理系统
+description: 证书管理与运维实践文档
+
+# 站点基础配置（用于生成正确链接）
+url: https://fsyyft.github.io
+baseurl: /certificate_authority
+lang: zh-CN
+
+# GitHub Pages 官方主题（可在需要时更换）
+# 方式一：使用 pages 官方远程主题
+remote_theme: pages-themes/cayman@v0.2.0
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# 方式二（可选）：使用旧的内置主题（与上方 remote_theme 二选一）
+# theme: jekyll-theme-cayman
+
+# 构建设置
+markdown: kramdown
+timezone: Asia/Shanghai
+permalink: pretty
+
+# 如需自定义导航、徽标、favicon 等，可按所用主题的文档在此处追加配置
