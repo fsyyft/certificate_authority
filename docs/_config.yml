@@ -8,7 +8,7 @@ lang: zh-CN
 
 # GitHub Pages 官方主题（可在需要时更换）
 # 方式一：使用 pages 官方远程主题
-remote_theme: pages-themes/cayman@v0.2.0
+remote_theme: pages-themes/slate@v0.2.0
 plugins:
   - jekyll-remote-theme
   - jekyll-seo-tag
